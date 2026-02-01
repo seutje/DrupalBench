@@ -5,6 +5,7 @@ import subprocess
 import time
 import sys
 import re
+import argparse
 
 # Add the project root to sys.path to allow importing from scripts if needed
 sys.path.append(os.getcwd())
@@ -25,10 +26,12 @@ MODEL_NAME = ENV.get("MODEL_NAME", "gemini-3-flash-preview")
 GEMINI_API_KEY = ENV.get("GEMINI_API_KEY")
 OLLAMA_HOST = ENV.get("OLLAMA_HOST", "http://localhost:11434")
 
-def run_command(command, shell=True):
+def run_command(command, shell=True, timeout=None):
     try:
-        result = subprocess.run(command, shell=shell, check=False, capture_output=True, text=True)
+        result = subprocess.run(command, shell=shell, check=False, capture_output=True, text=True, timeout=timeout)
         return result.returncode == 0, result.stdout, result.stderr
+    except subprocess.TimeoutExpired:
+        return False, "", "Command timed out"
     except Exception as e:
         return False, "", str(e)
 
@@ -94,25 +97,111 @@ def call_ollama(prompt, system_instruction):
         return None, str(e)
 
 def clean_patch_output(text):
-    # Extract diff if wrapped in markdown
-    if "```" in text:
-        match = re.search(r'```(?:diff|patch|php)?\s*(.*?)\s*```', text, re.DOTALL)
-        if match:
-            text = match.group(1)
+    # Extract all diffs wrapped in markdown
+    code_blocks = re.findall(r'```(?:\w+)?\s*(.*?)\s*```', text, re.DOTALL)
+    if code_blocks:
+        # Join all code blocks that look like diffs
+        cleaned_text = ""
+        for block in code_blocks:
+            if '--- ' in block or '+++ ' in block or 'diff --git' in block or '@@ ' in block:
+                cleaned_text += block + "\n"
+        if cleaned_text:
+            text = cleaned_text
     
-    # Remove any leading text before 'diff --git' or '--- '
-    if 'diff --git' in text:
-        text = text[text.find('diff --git'):]
-    elif '--- ' in text:
-        text = text[text.find('--- '):]
+    # Remove any leading text before 'diff --git', '--- ', or 'Index: '
+    patterns = ['diff --git', '--- ', 'Index: ']
+    first_idx = len(text)
+    found = False
+    for p in patterns:
+        idx = text.find(p)
+        if idx != -1 and idx < first_idx:
+            first_idx = idx
+            found = True
     
-    # Normalize line endings and ensure it ends with a newline
+    if found:
+        text = text[first_idx:]
+    
+    # Normalize line endings
     text = text.replace('\r\n', '\n')
-    text = text.strip()
+    
+    # Remove trailing newlines but preserve significant whitespace
+    text = text.rstrip('\n')
     if text:
         text += '\n'
     
     return text
+
+def fix_hunk_headers(patch_text):
+    """
+    Recalculates hunk headers to match actual line counts.
+    Also ensures context lines have a leading space.
+    """
+    if not patch_text:
+        return patch_text
+        
+    lines = patch_text.split('\n')
+    fixed_lines = []
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        if line.startswith('@@'):
+            # Parse @@ -old_start,old_len +new_start,new_len @@
+            match = re.match(r'@@ -(\d+),?(\d*) \+(\d+),?(\d*) @@(.*)', line)
+            if match:
+                old_start, _, new_start, _, rest = match.groups()
+                
+                # Count actual lines in this hunk
+                actual_old_len = 0
+                actual_new_len = 0
+                hunk_lines = []
+                j = i + 1
+                while j < len(lines):
+                    # End of hunk detected by next hunk or next file
+                    if j < len(lines) and (lines[j].startswith('@@') or 
+                                          lines[j].startswith('diff --git') or 
+                                          lines[j].startswith('--- ') or 
+                                          lines[j].startswith('Index: ')):
+                        break
+                    
+                    h_line = lines[j]
+                    if h_line.startswith('-'):
+                        actual_old_len += 1
+                        hunk_lines.append(h_line)
+                    elif h_line.startswith('+'):
+                        actual_new_len += 1
+                        hunk_lines.append(h_line)
+                    elif h_line.startswith(' ') or h_line == '':
+                        # Normal context line
+                        actual_old_len += 1
+                        actual_new_len += 1
+                        # Ensure empty context lines have at least a space if needed
+                        # although most tools are fine with empty lines as context
+                        hunk_lines.append(h_line)
+                    else:
+                        # Malformed context line (missing leading space)
+                        # Only fix if it's not some obvious garbage
+                        if len(h_line) > 0:
+                            actual_old_len += 1
+                            actual_new_len += 1
+                            hunk_lines.append(' ' + h_line)
+                        else:
+                            # Empty line
+                            actual_old_len += 1
+                            actual_new_len += 1
+                            hunk_lines.append(' ')
+                    j += 1
+                
+                # Update header
+                new_header = f"@@ -{old_start},{actual_old_len} +{new_start},{actual_new_len} @@{rest}"
+                fixed_lines.append(new_header)
+                fixed_lines.extend(hunk_lines)
+                i = j
+                continue
+        
+        fixed_lines.append(line)
+        i += 1
+    
+    return '\n'.join(fixed_lines)
 
 def reset_environment():
     print("  Resetting environment...")
@@ -136,6 +225,8 @@ def evaluate_task(task, samples_per_task=1):
             sample_results.append({"passed": False, "error": error or "No patch returned"})
             continue
 
+        patch = fix_hunk_headers(patch)
+
         # Save patch and copy to container
         with open("temp.patch", "w") as f:
             f.write(patch)
@@ -150,21 +241,39 @@ def evaluate_task(task, samples_per_task=1):
         run_command(f"docker cp temp.patch {container_id}:/var/www/html/task.patch")
         
         # Apply patch
-        # Try applying with -p1 in the web directory first, as most Drupal patches are relative to Drupal root (the 'web' folder in this setup)
-        # Also use -l to ignore whitespace differences and --fuzz=3 for better matching
-        success, stdout, stderr = run_command(f"docker-compose exec -T drupal patch -p1 -l -t -d web -i /var/www/html/task.patch")
-        if not success:
-            # Fallback to root directory if web fails
-            success, stdout, stderr = run_command(f"docker-compose exec -T drupal patch -p1 -l -t -i /var/www/html/task.patch")
+        patch_applied = False
+        # Try different combinations of directory and -p level
+        # Core patches are usually -p1 and relative to 'web'
+        # Some patches might be -p1 and relative to root
+        # Or -p0
+        options = [
+            ("-p1", "web"),
+            ("-p1", "."),
+            ("-p0", "web"),
+            ("-p0", "."),
+        ]
         
-        if not success:
-            # Final attempt with git apply if patch fails
-            success, stdout, stderr = run_command(f"docker-compose exec -T drupal git apply --directory=web /var/www/html/task.patch")
-            if not success:
-                success, stdout, stderr = run_command(f"docker-compose exec -T drupal git apply /var/www/html/task.patch")
+        last_error = ""
+        for p_level, directory in options:
+            success, stdout, stderr = run_command(f"docker-compose exec -T drupal patch {p_level} -l -t -d {directory} -i /var/www/html/task.patch")
+            if success:
+                print(f"    Patch applied successfully using patch {p_level} in {directory}")
+                patch_applied = True
+                break
+            last_error = stderr or stdout
+            
+        if not patch_applied:
+            # Try git apply as fallback
+            for directory in ["web", "."]:
+                success, stdout, stderr = run_command(f"docker-compose exec -T drupal git apply --directory={directory} /var/www/html/task.patch")
+                if success:
+                    print(f"    Patch applied successfully using git apply in {directory}")
+                    patch_applied = True
+                    break
+                last_error = stderr or stdout
 
-        if not success:
-            print(f"    FAILED to apply patch: {stderr or stdout}")
+        if not patch_applied:
+            print(f"    FAILED to apply patch: {last_error}")
             sample_results.append({"passed": False, "patch": patch, "error": "Patch application failed"})
             continue
 
@@ -179,8 +288,25 @@ def evaluate_task(task, samples_per_task=1):
                     v_success, v_stdout, v_stderr = run_command(f"python3 {v_path} app/web/modules/custom")
                     domain_results[name] = {"passed": v_success, "output": v_stdout + v_stderr}
 
+        # Determine which tests to run to avoid running the whole suite
+        test_path = ""
+        if "core/modules/" in patch:
+            match = re.search(r'core/modules/(\w+)', patch)
+            if match:
+                module = match.group(1)
+                test_path = f"web/core/modules/{module}"
+        elif "core/lib/" in patch:
+            test_path = "web/core/tests/Drupal/Tests/Core"
+        
         # Run PHPUnit
-        test_success, test_stdout, test_stderr = run_command("docker-compose exec -T drupal ./vendor/bin/phpunit")
+        if test_path:
+            print(f"    Running tests in {test_path}...")
+        else:
+            print("    Warning: No specific test path detected, running default suite...")
+            
+        phpunit_cmd = f"docker-compose exec -T drupal ./vendor/bin/phpunit {test_path}".strip()
+
+        test_success, test_stdout, test_stderr = run_command(phpunit_cmd, timeout=300)
         
         passed = test_success # Correctness is primarily defined by tests passing
         
@@ -208,6 +334,20 @@ def evaluate_task(task, samples_per_task=1):
     }
 
 def main():
+    parser = argparse.ArgumentParser(description="Evaluate LLM on DrupalBench tasks.")
+    parser.add_argument("--tasks", type=str, default="tasks.json", help="Path to tasks JSON file.")
+    parser.add_argument("--samples", type=int, default=10, help="Number of samples to run per task.")
+    parser.add_argument("--model", type=str, help="Override MODEL_NAME from .env")
+    parser.add_argument("--provider", type=str, help="Override MODEL_PROVIDER from .env")
+    
+    args = parser.parse_args()
+
+    global MODEL_NAME, MODEL_PROVIDER
+    if args.model:
+        MODEL_NAME = args.model
+    if args.provider:
+        MODEL_PROVIDER = args.provider
+
     print(f"Using Model Provider: {MODEL_PROVIDER}")
     print(f"Model Name: {MODEL_NAME}")
     
@@ -215,10 +355,8 @@ def main():
         print("Error: GEMINI_API_KEY not found in .env")
         sys.exit(1)
 
-    tasks_path = "tasks.json"
+    tasks_path = args.tasks
     synthetic_tasks_path = "synthetic_tasks.json"
-    if len(sys.argv) > 1:
-        tasks_path = sys.argv[1]
 
     all_tasks = []
     if os.path.exists(tasks_path):
@@ -237,8 +375,7 @@ def main():
         print("Error: No tasks found to evaluate.")
         sys.exit(1)
 
-    # Use samples_per_task=10
-    samples_per_task = 10
+    samples_per_task = args.samples
     
     results = {
         "model_name": MODEL_NAME,
