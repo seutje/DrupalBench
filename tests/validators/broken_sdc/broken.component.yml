@@ -1,0 +1,4 @@
+name: Broken Component
+props:
+  - not_a_dict
+slots: []
