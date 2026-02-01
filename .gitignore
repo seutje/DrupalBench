@@ -1,0 +1,17 @@
+# Ignore everything in app except specific config
+/app/*
+!/app/composer.json
+!/app/composer.lock
+!/app/health-check.php
+
+# Docker persistent data
+db_data/
+.db_data/
+
+# OS & IDE
+.DS_Store
+Thumbs.db
+*.tmp
+.vscode/
+*.code-workspace
+node_modules/

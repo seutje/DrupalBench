@@ -1,0 +1,29 @@
+services:
+  drupal:
+    build: .
+    container_name: drupalbench_app
+    ports:
+      - "8080:80"
+    environment:
+      - DRUPAL_DB_NAME=drupal
+      - DRUPAL_DB_USER=drupal
+      - DRUPAL_DB_PASSWORD=drupal
+      - DRUPAL_DB_HOST=db
+    volumes:
+      - ./app:/var/www/html
+    depends_on:
+      - db
+
+  db:
+    image: mariadb:10.11
+    container_name: drupalbench_db
+    environment:
+      - MYSQL_DATABASE=drupal
+      - MYSQL_USER=drupal
+      - MYSQL_PASSWORD=drupal
+      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  db_data:
