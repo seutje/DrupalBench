@@ -13,9 +13,7 @@ def get_api_key():
     return os.getenv("GEMINI_API_KEY")
 
 GEMINI_API_KEY = get_api_key()
-# The model name provided in the instructions is gemini-3-flash.
-# Standard public names are often gemini-1.5-flash or gemini-2.0-flash.
-MODEL_NAME = "gemini-3-flash"
+MODEL_NAME = "gemini-3-flash-preview"
 
 
 def scrape_change_records(limit=5):
