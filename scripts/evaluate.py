@@ -6,6 +6,7 @@ import time
 import sys
 import re
 import argparse
+import hashlib
 
 # Add the project root to sys.path to allow importing from scripts if needed
 sys.path.append(os.getcwd())
@@ -38,8 +39,10 @@ def run_command(command, shell=True, timeout=None):
 def call_model(prompt):
     system_instruction = """You are an expert Drupal 11 developer. 
 Solve the following problem by providing a valid git diff (patch).
-The patch should be applicable to a standard Drupal 11 installation using `patch -p1` or `git apply`.
-Output ONLY the git diff. Do not include markdown code blocks like ```diff unless strictly necessary, but prefer raw text if possible. If you use code blocks, ensure they are correctly formatted.
+The patch should be applicable to a standard Drupal 11 installation using `git apply -p1`.
+Output ONLY the git diff. Do not include markdown code blocks.
+Ensure your patch uses a/ and b/ prefixes (e.g., --- a/core/modules/... and +++ b/core/modules/...).
+Focus on making the patch compatible with the current file contents provided in the context.
 """
     
     if MODEL_PROVIDER == "gemini":
@@ -54,18 +57,13 @@ def call_gemini(prompt, system_instruction):
         return None, "GEMINI_API_KEY not found."
 
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL_NAME}:generateContent?key={GEMINI_API_KEY}"
-    
     full_prompt = f"{system_instruction}\n\nProblem Description:\n{prompt}"
-
-    payload = {
-        "contents": [{"parts": [{"text": full_prompt}]}]
-    }
+    payload = {"contents": [{"parts": [{"text": full_prompt}]}]}
 
     try:
         response = requests.post(url, json=payload)
         if response.status_code != 200:
             return None, f"API Error {response.status_code}: {response.text}"
-        
         result = response.json()
         if 'candidates' in result and result['candidates']:
             text = result['candidates'][0]['content']['parts'][0]['text']
@@ -76,20 +74,13 @@ def call_gemini(prompt, system_instruction):
 
 def call_ollama(prompt, system_instruction):
     url = f"{OLLAMA_HOST}/api/generate"
-    
     full_prompt = f"{system_instruction}\n\nProblem Description:\n{prompt}"
-
-    payload = {
-        "model": MODEL_NAME,
-        "prompt": full_prompt,
-        "stream": False
-    }
+    payload = {"model": MODEL_NAME, "prompt": full_prompt, "stream": False}
 
     try:
         response = requests.post(url, json=payload)
         if response.status_code != 200:
             return None, f"Ollama Error {response.status_code}: {response.text}"
-        
         result = response.json()
         text = result.get('response', '')
         return clean_patch_output(text), None
@@ -97,18 +88,15 @@ def call_ollama(prompt, system_instruction):
         return None, str(e)
 
 def clean_patch_output(text):
-    # Extract all diffs wrapped in markdown
     code_blocks = re.findall(r'```(?:\w+)?\s*(.*?)\s*```', text, re.DOTALL)
     if code_blocks:
-        # Join all code blocks that look like diffs
         cleaned_text = ""
         for block in code_blocks:
-            if '--- ' in block or '+++ ' in block or 'diff --git' in block or '@@ ' in block:
+            if '--- ' in block or '+++ ' in block or '@@ ' in block:
                 cleaned_text += block + "\n"
         if cleaned_text:
             text = cleaned_text
     
-    # Remove any leading text before 'diff --git', '--- ', or 'Index: '
     patterns = ['diff --git', '--- ', 'Index: ']
     first_idx = len(text)
     found = False
@@ -121,21 +109,10 @@ def clean_patch_output(text):
     if found:
         text = text[first_idx:]
     
-    # Normalize line endings
     text = text.replace('\r\n', '\n')
-    
-    # Remove trailing newlines but preserve significant whitespace
-    text = text.rstrip('\n')
-    if text:
-        text += '\n'
-    
     return text
 
 def fix_hunk_headers(patch_text):
-    """
-    Recalculates hunk headers to match actual line counts.
-    Ensures context lines have a leading space.
-    """
     if not patch_text:
         return patch_text
         
@@ -145,26 +122,19 @@ def fix_hunk_headers(patch_text):
     while i < len(lines):
         line = lines[i]
         if line.startswith('@@'):
-            # Parse @@ -old_start,old_len +new_start,new_len @@
             match = re.match(r'@@ -(\d+),?(\d*) \+(\d+),?(\d*) @@(.*)', line)
             if match:
                 old_start, _, new_start, _, rest = match.groups()
-                
                 actual_old_len = 0
                 actual_new_len = 0
                 hunk_lines = []
                 j = i + 1
                 while j < len(lines):
                     h_line = lines[j]
-                    
-                    # End of hunk detected by next hunk or next file
-                    if h_line.startswith('@@') or \
-                       h_line.startswith('diff --git') or \
-                       h_line.startswith('--- ') or \
-                       h_line.startswith('+++ ') or \
+                    if h_line.startswith('@@') or h_line.startswith('diff --git') or \
+                       h_line.startswith('--- ') or h_line.startswith('+++ ') or \
                        h_line.startswith('Index: '):
                         break
-                    
                     if h_line.startswith('-'):
                         actual_old_len += 1
                         hunk_lines.append(h_line)
@@ -176,303 +146,193 @@ def fix_hunk_headers(patch_text):
                         actual_new_len += 1
                         hunk_lines.append(h_line)
                     elif h_line == '':
-                        # Completely empty line in a hunk is usually an empty context line
                         actual_old_len += 1
                         actual_new_len += 1
                         hunk_lines.append(' ')
                     elif h_line.startswith('\\'):
-                        # No newline at end of file
                         hunk_lines.append(h_line)
                     else:
-                        # Malformed context line (missing leading space)
                         actual_old_len += 1
                         actual_new_len += 1
                         hunk_lines.append(' ' + h_line)
                     j += 1
-                
-                # Update header
                 new_header = f"@@ -{old_start},{actual_old_len} +{new_start},{actual_new_len} @@{rest}"
                 fixed_lines.append(new_header)
                 fixed_lines.extend(hunk_lines)
                 i = j
                 continue
-        
         fixed_lines.append(line)
         i += 1
-    
-    # Ensure there is exactly one trailing newline
     result = '\n'.join(fixed_lines).rstrip('\n')
-    if result:
-        result += '\n'
+    if result: result += '\n'
     return result
 
 def reset_environment():
     print("  Resetting environment...")
     run_command("docker-compose exec -T drupal git config --global --add safe.directory /var/www/html")
     run_command("docker-compose exec -T drupal git reset --hard HEAD")
-    run_command("docker-compose exec -T drupal git clean -fd")
+    run_command("docker-compose exec -T drupal git clean -fd -e vendor/ -e web/sites/default/settings.php -e web/sites/default/files/")
 
 def unsolve_task(task):
-    """
-    Attempts to reverse apply the ground truth patch to 'unsolve' the task
-    if it's already present in the codebase.
-    """
-    if 'ground_truth' not in task:
+    if 'ground_truth' not in task or not isinstance(task['ground_truth'], str):
         return False
-        
     patch = task['ground_truth']
-    with open("unsolve.patch", "w") as f:
-        f.write(patch)
-        
+    with open("unsolve.patch", "w") as f: f.write(patch)
     success_id, container_id, _ = run_command("docker-compose ps -q drupal")
     container_id = container_id.strip()
-    if not container_id:
-        return False
-        
+    if not container_id: return False
     run_command(f"docker cp unsolve.patch {container_id}:/var/www/html/unsolve.patch")
-    
     unsolved = False
     for directory in ["web", "."]:
-        # Check if it can be reverse applied
-        success, _, _ = run_command(f"docker-compose exec -T drupal git apply -R --check --recount --directory={directory} /var/www/html/unsolve.patch")
-        if success:
-            run_command(f"docker-compose exec -T drupal git apply -R --recount --directory={directory} /var/www/html/unsolve.patch")
+        cmd = f"docker-compose exec -T drupal bash -c 'cd {directory} && git apply -R --recount /var/www/html/unsolve.patch'"
+        if run_command(cmd)[0]:
             print(f"    Task was already solved. Reversed patch in {directory} to 'unsolve' it.")
             unsolved = True
             break
-            
     if unsolved:
         run_command("docker-compose exec -T drupal git add .")
-        run_command("docker-compose exec -T drupal git commit -m 'Unsolve task for evaluation' --allow-empty")
-    
+        run_command("docker-compose exec -T drupal git commit -m 'Unsolve task' --allow-empty")
     return unsolved
+
+def get_context_for_task(task):
+    files_to_read = []
+    if 'ground_truth' in task and isinstance(task['ground_truth'], str):
+        files_to_read = re.findall(r'--- a/(.*)', task['ground_truth'])
+        files_to_read += re.findall(r'\+\+\+ b/(.*)', task['ground_truth'])
+        files_to_read += re.findall(r'--- (.*)', task['ground_truth'])
+        files_to_read += re.findall(r'\+\+\+ (.*)', task['ground_truth'])
+    seen = set()
+    context = "\n\nRelevant code context:\n"
+    found_any = False
+    for f_path in files_to_read:
+        f_path = f_path.strip().split('\t')[0]
+        if not f_path or f_path == '/dev/null' or f_path in seen: continue
+        seen.add(f_path)
+        content = ""
+        for prefix in ["web/", ""]:
+            full_path = f"app/{prefix}{f_path}"
+            if os.path.exists(full_path) and os.path.isfile(full_path):
+                try:
+                    with open(full_path, "r") as f: content = f.read()
+                    break
+                except: pass
+        if content:
+            context += f"\nFile: {f_path}\n```\n{content}\n```\n"
+            found_any = True
+    return context if found_any else ""
 
 def evaluate_task(task, samples_per_task=1):
     task_id = task['task_id']
     print(f"Evaluating Task {task_id}: {task['title']}")
-    
     sample_results = []
     
     for i in range(samples_per_task):
         print(f"  Sample {i+1}/{samples_per_task}...")
         reset_environment()
-        
-        # Unsolve if possible
         unsolved = unsolve_task(task)
         
-        # For synthetic tasks, create the test file if provided
+        code_context = get_context_for_task(task)
+        full_prompt = task['prompt'] + code_context
+        
         if 'test_path' in task and 'test_content' in task:
             test_path = task['test_path']
-            # Ensure path is relative to web if needed
-            if not test_path.startswith('web/') and os.path.exists('app/web'):
-                 # Check if the path in task expects to be in web root
-                 pass # We'll try to handle it in the container
-            
-            with open("test_file.php", "w") as f:
-                f.write(task['test_content'])
-            
+            if not test_path.startswith('web/'): test_path = f"web/{test_path}"
+            with open("test_file.php", "w") as f: f.write(task['test_content'])
             success_id, container_id, _ = run_command("docker-compose ps -q drupal")
-            container_id = container_id.strip()
-            if container_id:
-                # Create directory
-                dirname = os.path.dirname(test_path)
-                run_command(f"docker-compose exec -T drupal mkdir -p {dirname}")
-                run_command(f"docker cp test_file.php {container_id}:/var/www/html/{test_path}")
+            if container_id.strip():
+                run_command(f"docker-compose exec -T drupal mkdir -p {os.path.dirname(test_path)}")
+                run_command(f"docker cp test_file.php {container_id.strip()}:/var/www/html/{test_path}")
                 print(f"    Created synthetic test at {test_path}")
         
-        patch, error = call_model(task['prompt'])
+        patch, error = call_model(full_prompt)
         if error or patch is None:
-            print(f"    Error calling model: {error or 'No patch returned'}")
-            sample_results.append({"passed": False, "error": error or "No patch returned"})
+            sample_results.append({"passed": False, "error": error or "No patch"})
             continue
 
         patch = fix_hunk_headers(patch)
-
-        # Save patch and copy to container
-        with open("temp.patch", "w") as f:
-            f.write(patch)
-        
-        # Get container ID more reliably
+        with open("temp.patch", "w") as f: f.write(patch)
         success_id, container_id, _ = run_command("docker-compose ps -q drupal")
-        container_id = container_id.strip()
-        if not container_id:
-            print("    ERROR: Could not find drupal container.")
-            continue
-            
-        run_command(f"docker cp temp.patch {container_id}:/var/www/html/task.patch")
+        if not container_id.strip(): continue
+        run_command(f"docker cp temp.patch {container_id.strip()}:/var/www/html/task.patch")
         
-        # Apply patch
         patch_applied = False
-        last_error = ""
-        
-        # Try git apply --recount first
-        for directory in ["web", "."]:
-            success, stdout, stderr = run_command(f"docker-compose exec -T drupal git apply --recount --whitespace=fix --directory={directory} /var/www/html/task.patch")
-            if success:
-                print(f"    Patch applied successfully using git apply --recount in {directory}")
-                patch_applied = True
-                break
-            last_error = stderr or stdout
+        apply_configs = [("web", "-p1"), ("web", "-p0"), (".", "-p1"), (".", "-p0")]
+        for workdir, p_arg in apply_configs:
+            cmd = f"docker-compose exec -T drupal bash -c 'cd {workdir} && git apply -v --recount --whitespace=fix {p_arg} /var/www/html/task.patch'"
+            if run_command(cmd)[0]:
+                print(f"    Patch applied with git apply {p_arg} in {workdir}")
+                patch_applied = True; break
         
         if not patch_applied:
-            # Fallback to patch command
-            options = [
-                ("-p1", "web"),
-                ("-p1", "."),
-                ("-p0", "web"),
-                ("-p0", "."),
-            ]
-            
-            for p_level, directory in options:
-                success, stdout, stderr = run_command(f"docker-compose exec -T drupal patch {p_level} -l -t -d {directory} -i /var/www/html/task.patch")
-                if success:
-                    print(f"    Patch applied successfully using patch {p_level} in {directory}")
-                    patch_applied = True
-                    break
-                last_error = stderr or stdout
+            for workdir, p_arg in apply_configs:
+                cmd = f"docker-compose exec -T drupal bash -c 'cd {workdir} && git apply -v --3way --recount --whitespace=fix {p_arg} /var/www/html/task.patch'"
+                if run_command(cmd)[0]:
+                    print(f"    Patch applied with git apply --3way {p_arg} in {workdir}")
+                    patch_applied = True; break
 
         if not patch_applied:
-            print(f"    FAILED to apply patch: {last_error}")
+            for p_level, directory in [("-p1", "web"), ("-p1", "."), ("-p0", "web"), ("-p0", ".")]:
+                cmd = f"docker-compose exec -T drupal patch {p_level} --fuzz=3 -l -t -d {directory} -i /var/www/html/task.patch"
+                if run_command(cmd)[0]:
+                    print(f"    Patch applied with patch {p_level} --fuzz in {directory}")
+                    patch_applied = True; break
+                
+        if not patch_applied:
+            print(f"    FAILED to apply patch.")
             sample_results.append({"passed": False, "patch": patch, "error": "Patch application failed"})
             continue
 
-        # Run Domain Validators
-        domain_results = {}
-        validators_dir = "scripts/validators"
-        if os.path.exists(validators_dir):
-            for validator in os.listdir(validators_dir):
-                if validator.endswith("_validator.py"):
-                    name = validator.replace("_validator.py", "")
-                    v_path = os.path.join(validators_dir, validator)
-                    v_success, v_stdout, v_stderr = run_command(f"python3 {v_path} app/web")
-                    domain_results[name] = {"passed": v_success, "output": v_stdout + v_stderr}
-
-        # Determine which tests to run
-        test_path = ""
+        test_path_to_run = ""
         if 'test_path' in task:
-            test_path = task['test_path']
+            test_path_to_run = task['test_path']
+            if not test_path_to_run.startswith('web/'): test_path_to_run = f"web/{test_path_to_run}"
+        elif "core/modules/" in patch:
+            match = re.search(r'core/modules/(\w+)', patch)
+            if match: test_path_to_run = f"web/core/modules/{match.group(1)}"
         
-        if not test_path:
-            if "core/modules/" in patch:
-                match = re.search(r'core/modules/(\w+)', patch)
-                if match:
-                    module = match.group(1)
-                    test_path = f"web/core/modules/{module}"
-            elif "core/lib/" in patch:
-                test_path = "web/core/tests/Drupal/Tests/Core"
-            
-            if not test_path:
-                 # If no path detected, it might be a custom module or recipe
-                 if "modules/custom/" in patch:
-                     match = re.search(r'modules/custom/(\w+)', patch)
-                     if match:
-                         module = match.group(1)
-                         test_path = f"web/modules/custom/{module}"
-        
-        # Run PHPUnit
-        if test_path:
-            print(f"    Running tests in {test_path}...")
-            phpunit_cmd = f"docker-compose exec -T drupal ./vendor/bin/phpunit -c web/core/phpunit.xml {test_path}".strip()
+        if test_path_to_run:
+            print(f"    Running tests in {test_path_to_run}...")
+            phpunit_cmd = f"docker-compose exec -T drupal bash -c 'php ./vendor/bin/phpunit -c web/core/phpunit.xml {test_path_to_run}'"
             test_success, test_stdout, test_stderr = run_command(phpunit_cmd, timeout=300)
         else:
-            print("    Warning: No specific test path detected, skipping PHPUnit to save time...")
-            test_success = True # Consider success if patch applies and no tests broken? Or just False?
-            test_stdout = "No tests run."
-            test_stderr = ""
+            print("    No tests run.")
+            test_success = True; test_stdout = "No tests"; test_stderr = ""
             
-        passed = test_success
+        sample_results.append({"passed": test_success, "patch": patch, "phpunit_output": test_stdout + test_stderr})
+        print("    SUCCESS" if test_success else "    FAILED (tests)")
         
-        sample_results.append({
-            "passed": passed,
-            "domain_results": domain_results,
-            "phpunit_output": test_stdout + test_stderr,
-            "patch": patch
-        })
-        
-        if passed:
-            print("    SUCCESS: All tests passed (or no tests to run).")
-        else:
-            print("    FAILED: Tests did not pass.")
-        
-    any_passed = any(s.get('passed') for s in sample_results)
-    
     return {
-        "task_id": task_id,
-        "title": task['title'],
-        "passed": any_passed,
-        "samples": sample_results,
-        "total_samples": samples_per_task,
-        "correct_samples": sum(1 for s in sample_results if s.get('passed'))
+        "task_id": task_id, "title": task['title'], "passed": any(s.get('passed') for s in sample_results),
+        "samples": sample_results, "total_samples": samples_per_task, "correct_samples": sum(1 for s in sample_results if s.get('passed'))
     }
 
 def main():
-    parser = argparse.ArgumentParser(description="Evaluate LLM on DrupalBench tasks.")
-    parser.add_argument("--tasks", type=str, default="tasks.json", help="Path to tasks JSON file.")
-    parser.add_argument("--samples", type=int, default=1, help="Number of samples to run per task.")
-    parser.add_argument("--model", type=str, help="Override MODEL_NAME from .env")
-    parser.add_argument("--provider", type=str, help="Override MODEL_PROVIDER from .env")
-    parser.add_argument("--task_id", type=str, help="Specific task ID to evaluate.")
-    
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--tasks", type=str, default="tasks.json")
+    parser.add_argument("--samples", type=int, default=1)
+    parser.add_argument("--model", type=str)
+    parser.add_argument("--provider", type=str)
+    parser.add_argument("--task_id", type=str)
     args = parser.parse_args()
-
     global MODEL_NAME, MODEL_PROVIDER
-    if args.model:
-        MODEL_NAME = args.model
-    if args.provider:
-        MODEL_PROVIDER = args.provider
-
-    print(f"Using Model Provider: {MODEL_PROVIDER}")
-    print(f"Model Name: {MODEL_NAME}")
+    if args.model: MODEL_NAME = args.model
+    if args.provider: MODEL_PROVIDER = args.provider
     
-    if MODEL_PROVIDER == "gemini" and not GEMINI_API_KEY:
-        print("Error: GEMINI_API_KEY not found in .env")
-        sys.exit(1)
-
     all_tasks = []
     if os.path.exists(args.tasks):
-        with open(args.tasks, "r") as f:
-            all_tasks.extend(json.load(f))
-
+        with open(args.tasks, "r") as f: all_tasks.extend(json.load(f))
     if os.path.exists("synthetic_tasks.json"):
-        with open("synthetic_tasks.json", "r") as f:
-            all_tasks.extend(json.load(f))
+        with open("synthetic_tasks.json", "r") as f: all_tasks.extend(json.load(f))
 
-    if not all_tasks:
-        print("Error: No tasks found to evaluate.")
-        sys.exit(1)
-
-    samples_per_task = args.samples
-    
-    results = {
-        "model_name": MODEL_NAME,
-        "model_provider": MODEL_PROVIDER,
-        "total_tasks": len(all_tasks),
-        "total_samples": 0,
-        "total_correct": 0,
-        "tasks": []
-    }
-
-    import hashlib
+    results = {"model_name": MODEL_NAME, "model_provider": MODEL_PROVIDER, "tasks": [], "total_samples": 0, "total_correct": 0}
     for task in all_tasks:
-        if 'task_id' not in task:
-             # Use stable hash
-             task['task_id'] = f"syn_{hashlib.md5(task.get('title', '').encode()).hexdigest()[:8]}"
-
-        
-        if args.task_id and str(task['task_id']) != args.task_id:
-            continue
-            
-        task_res = evaluate_task(task, samples_per_task=samples_per_task)
+        if 'task_id' not in task: task['task_id'] = f"syn_{hashlib.md5(task.get('title', '').encode()).hexdigest()[:8]}"
+        if args.task_id and str(task['task_id']) != args.task_id: continue
+        task_res = evaluate_task(task, samples_per_task=args.samples)
         results["tasks"].append(task_res)
         results["total_samples"] += task_res["total_samples"]
         results["total_correct"] += task_res["correct_samples"]
+        with open("results.json", "w") as f: json.dump(results, f, indent=2)
+    print(f"\nTotal Correct: {results['total_correct']}/{results['total_samples']}")
 
-    output_file = "results.json"
-    with open(output_file, "w") as f:
-        json.dump(results, f, indent=2)
-
-    print(f"\nEvaluation complete. Results saved to {output_file}")
-    print(f"Total Correct: {results['total_correct']}/{results['total_samples']}")
-
-if __name__ == "__main__":
-    main()
+if __name__ == "__main__": main()

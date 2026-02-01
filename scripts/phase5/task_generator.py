@@ -4,6 +4,7 @@ import requests
 import re
 import time
 import sys
+import argparse
 
 # Add the project root to sys.path
 sys.path.append(os.getcwd())
@@ -84,12 +85,17 @@ def generate_task(change_record):
     prompt = prompt_template.replace("{{change_record_context}}", f"Title: {change_record['title']}\nURL: {change_record['url']}\nContent: {change_record['content']}")
     
     if MODEL_PROVIDER == "gemini":
-        return generate_task_gemini(prompt)
+        task = generate_task_gemini(prompt)
     elif MODEL_PROVIDER == "ollama":
-        return generate_task_ollama(prompt)
+        task = generate_task_ollama(prompt)
     else:
         print(f"Error: Unknown model provider: {MODEL_PROVIDER}")
         return None
+        
+    if task and isinstance(task.get('ground_truth'), dict):
+         task['ground_truth'] = "" # Fix hallucinated dict
+         
+    return task
 
 def generate_task_gemini(prompt):
     if not GEMINI_API_KEY:
@@ -100,9 +106,7 @@ def generate_task_gemini(prompt):
     
     payload = {
         "contents": [{"parts": [{"text": prompt}]}],
-        "generationConfig": {
-            "response_mime_type": "application/json"
-        }
+        "generationConfig": {"response_mime_type": "application/json"}
     }
 
     max_retries = 3
@@ -129,9 +133,6 @@ def generate_task_gemini(prompt):
 def generate_task_ollama(prompt):
     url = f"{OLLAMA_HOST}/api/generate"
     
-    # Force JSON response in prompt if provider is Ollama and doesn't support format: json
-    # (Deepseek-coder-v2 should be fine if we ask for JSON)
-    
     payload = {
         "model": MODEL_NAME,
         "prompt": prompt,
@@ -153,6 +154,10 @@ def generate_task_ollama(prompt):
         return None
 
 def main():
+    parser = argparse.ArgumentParser(description="Generate synthetic Drupal 11 tasks.")
+    parser.add_argument("--limit", type=int, default=5, help="Number of change records to process.")
+    args = parser.parse_args()
+
     print(f"Using Model Provider: {MODEL_PROVIDER}")
     print(f"Model Name: {MODEL_NAME}")
     
@@ -161,7 +166,7 @@ def main():
         sys.exit(1)
 
     print("Scraping Drupal 11 Change Records...")
-    records = scrape_change_records(limit=50)
+    records = scrape_change_records(limit=args.limit)
     print(f"Found {len(records)} records.")
     
     output_file = "synthetic_tasks.json"
@@ -189,7 +194,6 @@ def main():
             synthetic_tasks.append(task)
             new_tasks_count += 1
             print(f"  Successfully generated: {task['title']}")
-            # Save incrementally in case of interruption
             with open(output_file, "w") as f:
                 json.dump(synthetic_tasks, f, indent=2)
         

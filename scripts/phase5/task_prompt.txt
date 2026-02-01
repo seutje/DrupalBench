@@ -13,7 +13,7 @@ The output must be a JSON object with the following fields:
 - title: A concise title for the task.
 - prompt: A detailed problem description in HTML format, similar to a Drupal.org issue summary. It should include "Problem/Motivation", "Proposed resolution", and "Remaining tasks".
 - ground_truth: A git diff showing the correct implementation of the solution.
-- test_path: The file path where a new PHPUnit test should be created (e.g., "core/modules/system/tests/src/Kernel/NewFeatureTest.php").
+- test_path: The file path relative to Drupal root where a new PHPUnit test should be created (MUST start with "web/", e.g., "web/core/modules/system/tests/src/Kernel/NewFeatureTest.php").
 - test_content: The complete PHP code for the PHPUnit test that verifies the fix. Ensure it is compatible with PHPUnit 10/11.
 - version: "11.x"
 
@@ -22,13 +22,13 @@ Structure of the output:
   "title": "...",
   "prompt": "...",
   "ground_truth": "...",
-  "test_path": "...",
+  "test_path": "web/...",
   "test_content": "...",
   "version": "11.x"
 }
 
 Ensure the ground_truth is a valid git diff that can be applied to a Drupal 11 installation.
-CRITICAL: Use full paths relative to the Drupal root in the diff (e.g., "web/modules/custom/my_module/..." or "web/core/...").
+CRITICAL: Use full paths starting with 'web/' in the diff (e.g., --- a/web/core/... and +++ b/web/core/...).
 
 Focus on modern Drupal 11 standards:
 - Use PHP 8.3 attributes instead of annotations where applicable.
