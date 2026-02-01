@@ -159,23 +159,39 @@ def main():
         sys.exit(1)
 
     print("Scraping Drupal 11 Change Records...")
-    records = scrape_change_records(limit=3)
+    records = scrape_change_records(limit=50)
     print(f"Found {len(records)} records.")
     
-    synthetic_tasks = []
+    output_file = "synthetic_tasks.json"
+    if os.path.exists(output_file):
+        with open(output_file, "r") as f:
+            try:
+                synthetic_tasks = json.load(f)
+            except:
+                synthetic_tasks = []
+    else:
+        synthetic_tasks = []
+
+    existing_urls = {t.get('source_url') for t in synthetic_tasks}
+    
+    new_tasks_count = 0
     for i, record in enumerate(records):
+        if record['url'] in existing_urls:
+            print(f"  Skipping already existing task for: {record['title']}")
+            continue
+
         print(f"Generating task {i+1}/{len(records)} for: {record['title']}...")
         task = generate_task(record)
         if task:
             task['source_url'] = record['url']
             synthetic_tasks.append(task)
+            new_tasks_count += 1
             print(f"  Successfully generated: {task['title']}")
+            # Save incrementally in case of interruption
+            with open(output_file, "w") as f:
+                json.dump(synthetic_tasks, f, indent=2)
         
-    if synthetic_tasks:
-        output_file = "synthetic_tasks.json"
-        with open(output_file, "w") as f:
-            json.dump(synthetic_tasks, f, indent=2)
-        print(f"Saved {len(synthetic_tasks)} synthetic tasks to {output_file}")
+    print(f"Added {new_tasks_count} new synthetic tasks. Total: {len(synthetic_tasks)}")
 
 if __name__ == "__main__":
     main()

@@ -67,82 +67,88 @@ def main():
         tasks = []
         
     print(f"Loaded {len(tasks)} existing tasks.")
-    target_tasks = 100
+    target_tasks = 300
     
     # Statuses: RTBC(14), Fixed(2), Closed(fixed)(7)
-    for status in ["2", "7", "14"]:
+    projects = ["3060", "22025", "24719", "3266", "282134", "1818290", "2110197", "1106096", "2544710"]
+    for project in projects:
         if len(tasks) >= target_tasks:
             break
-            
-        print(f"Checking status {status}...")
-        page = 10 if status == "2" else 0
-        while len(tasks) < target_tasks and page < 100:
-            print(f"Fetching page {page} for status {status}...")
-            url = f"{DRUPAL_NODE_API}.json"
-            params = {
-                "type": "project_issue",
-                "field_project": "3060",
-                "field_issue_status": status,
-                "limit": 50,
-                "page": page,
-                "sort": "changed",
-                "direction": "DESC"
-            }
-            try:
-                response = requests.get(url, params=params, headers=HEADERS)
-                if response.status_code == 429:
-                    print("Rate limit hit, sleeping...")
-                    time.sleep(30)
-                    continue
-                response.raise_for_status()
-                issues = response.json().get("list", [])
-            except Exception as e:
-                print(f"Error fetching issues: {e}")
+        print(f"Checking project {project}...")
+        for status in ["2", "7", "14"]:
+            if len(tasks) >= target_tasks:
                 break
                 
-            if not issues:
-                break
-                
-            for issue in issues:
-                nid = issue.get("nid")
-                title = issue.get("title")
-                version = issue.get("field_issue_version")
-                
-                if version not in ["main", "11.x-dev", "10.4.x-dev", "10.3.x-dev"]:
-                    continue
-                    
-                if any(t['task_id'] == nid for t in tasks):
-                    continue
-
-                print(f"Searching MR for Issue #{nid}: {title}")
-                mr_id = search_gitlab_mr(nid)
-                
-                if not mr_id:
-                    continue
-
-                print(f"  Found MR !{mr_id}. Checking diff...")
-                diff = get_mr_diff(mr_id)
-                if diff and has_phpunit_tests(diff):
-                    print(f"    Found PHPUnit tests. Adding to tasks ({len(tasks)+1}/{target_tasks}).")
-                    tasks.append({
-                        "task_id": nid,
-                        "title": title,
-                        "version": version,
-                        "prompt": issue.get("body", {}).get("value", ""),
-                        "ground_truth": diff,
-                        "mr_id": mr_id,
-                        "url": f"https://www.drupal.org/i/{nid}"
-                    })
-                    with open(tasks_file, "w") as f:
-                        json.dump(tasks, f, indent=2)
-                
-                if len(tasks) >= target_tasks:
+            print(f"  Checking status {status} for project {project}...")
+            page = 0
+            while len(tasks) < target_tasks and page < 20:
+                print(f"    Fetching page {page} for status {status}...")
+                url = f"{DRUPAL_NODE_API}.json"
+                params = {
+                    "type": "project_issue",
+                    "field_project": project,
+                    "field_issue_status": status,
+                    "limit": 50,
+                    "page": page,
+                    "sort": "changed",
+                    "direction": "DESC"
+                }
+                try:
+                    response = requests.get(url, params=params, headers=HEADERS)
+                    if response.status_code == 429:
+                        print("Rate limit hit, sleeping...")
+                        time.sleep(30)
+                        continue
+                    response.raise_for_status()
+                    issues = response.json().get("list", [])
+                except Exception as e:
+                    print(f"Error fetching issues: {e}")
                     break
                     
-                time.sleep(0.5)
-                
-            page += 1
-            time.sleep(2)
+                if not issues:
+                    break
+                    
+                for issue in issues:
+                    nid = issue.get("nid")
+                    title = issue.get("title")
+                    version = issue.get("field_issue_version")
+                    
+                    if not version or not any(v in version for v in ["main", "11.", "10.4", "10.3"]):
+                        continue
+                        
+                    if any(t['task_id'] == nid for t in tasks):
+                        continue
+
+                    print(f"Searching MR for Issue #{nid}: {title}")
+                    mr_id = search_gitlab_mr(nid)
+
+                    
+                    if not mr_id:
+                        continue
+
+                    print(f"  Found MR !{mr_id}. Checking diff...")
+                    diff = get_mr_diff(mr_id)
+                    if diff and has_phpunit_tests(diff):
+                        print(f"    Found PHPUnit tests. Adding to tasks ({len(tasks)+1}/{target_tasks}).")
+                        tasks.append({
+                            "task_id": nid,
+                            "title": title,
+                            "version": version,
+                            "prompt": issue.get("body", {}).get("value", ""),
+                            "ground_truth": diff,
+                            "mr_id": mr_id,
+                            "url": f"https://www.drupal.org/i/{nid}"
+                        })
+                        with open(tasks_file, "w") as f:
+                            json.dump(tasks, f, indent=2)
+                    
+                    if len(tasks) >= target_tasks:
+                        break
+                        
+                    time.sleep(0.5)
+                    
+                page += 1
+                time.sleep(2)
             
     print(f"Successfully mined {len(tasks)} tasks and saved to tasks.json")
 
