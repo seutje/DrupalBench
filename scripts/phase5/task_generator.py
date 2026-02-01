@@ -3,24 +3,37 @@ import json
 import requests
 import re
 import time
+import sys
 
-def get_api_key():
+# Add the project root to sys.path
+sys.path.append(os.getcwd())
+
+def load_env():
+    env = {}
     if os.path.exists(".env"):
         with open(".env", "r") as f:
             for line in f:
-                if line.startswith("GEMINI_API_KEY="):
-                    return line.split("=", 1)[1].strip()
-    return os.getenv("GEMINI_API_KEY")
+                if "=" in line and not line.startswith("#"):
+                    key, value = line.split("=", 1)
+                    env[key.strip()] = value.strip()
+    return env
 
-GEMINI_API_KEY = get_api_key()
-MODEL_NAME = "gemini-3-flash-preview"
-
+ENV = load_env()
+MODEL_PROVIDER = ENV.get("MODEL_PROVIDER", "gemini")
+MODEL_NAME = ENV.get("MODEL_NAME", "gemini-3-flash-preview")
+GEMINI_API_KEY = ENV.get("GEMINI_API_KEY")
+OLLAMA_HOST = ENV.get("OLLAMA_HOST", "http://localhost:11434")
 
 def scrape_change_records(limit=5):
     url = "https://www.drupal.org/list-changes/drupal"
     headers = {"User-Agent": "DrupalBench/0.1"}
     print(f"Fetching {url}...")
-    response = requests.get(url, headers=headers)
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+    except Exception as e:
+        print(f"Error fetching change records: {e}")
+        return []
     
     # Broaden regex to find links to change records
     links = re.findall(r'<td\s+class="views-field views-field-title"[^>]*>\s*<a\s+href="([^"]+)"[^>]*>([^<]+)</a>', response.text)
@@ -35,96 +48,116 @@ def scrape_change_records(limit=5):
         full_url = href if href.startswith('http') else "https://www.drupal.org" + href
         print(f"Fetching change record: {full_url}...")
         
-        # Get the content of the change record
-        rec_res = requests.get(full_url, headers=headers)
-        
-        # Extract body content - Drupal 7 site uses field-name-field-description
-        body_match = re.search(r'<div class="field field-name-field-description[^>]*>(.*?)</div>\s*</div>', rec_res.text, re.DOTALL)
-        if not body_match:
-            # Fallback for older or different structure
-            body_match = re.search(r'<div class="field field-name-body[^>]*>(.*?)</div>\s*</div>', rec_res.text, re.DOTALL)
-        if not body_match:
-            # Another fallback
-            body_match = re.search(r'<div class="field-item even" property="content:encoded">(.*?)</div>', rec_res.text, re.DOTALL)
+        try:
+            rec_res = requests.get(full_url, headers=headers)
+            rec_res.raise_for_status()
             
-        if body_match:
-            content = body_match.group(1)
-            # Basic HTML tag removal
-            content = re.sub(r'<[^>]+>', '', content).strip()
-            # Clean up whitespace
-            content = re.sub(r'\s+', ' ', content)
-            
-            records.append({
-                "title": title.strip(),
-                "url": full_url,
-                "content": content[:3000] # Slightly larger limit for more context
-            })
-            print(f"  Scraped: {title.strip()}")
-        else:
-            print(f"  WARNING: Could not find body content for {full_url}")
+            # Extract body content
+            body_match = re.search(r'<div class="field field-name-field-description[^>]*>(.*?)</div>\s*</div>', rec_res.text, re.DOTALL)
+            if not body_match:
+                body_match = re.search(r'<div class="field field-name-body[^>]*>(.*?)</div>\s*</div>', rec_res.text, re.DOTALL)
+            if not body_match:
+                body_match = re.search(r'<div class="field-item even" property="content:encoded">(.*?)</div>', rec_res.text, re.DOTALL)
+                
+            if body_match:
+                content = body_match.group(1)
+                content = re.sub(r'<[^>]+>', '', content).strip()
+                content = re.sub(r'\s+', ' ', content)
+                
+                records.append({
+                    "title": title.strip(),
+                    "url": full_url,
+                    "content": content[:3000]
+                })
+                print(f"  Scraped: {title.strip()}")
+            else:
+                print(f"  WARNING: Could not find body content for {full_url}")
+        except Exception as e:
+            print(f"  Error fetching {full_url}: {e}")
             
     return records
 
 def generate_task(change_record):
-    if not GEMINI_API_KEY:
-        print("Error: GEMINI_API_KEY not found in .env or environment.")
-        return None
-
     with open("scripts/phase5/task_prompt.txt", "r") as f:
         prompt_template = f.read()
     
     prompt = prompt_template.replace("{{change_record_context}}", f"Title: {change_record['title']}\nURL: {change_record['url']}\nContent: {change_record['content']}")
     
+    if MODEL_PROVIDER == "gemini":
+        return generate_task_gemini(prompt)
+    elif MODEL_PROVIDER == "ollama":
+        return generate_task_ollama(prompt)
+    else:
+        print(f"Error: Unknown model provider: {MODEL_PROVIDER}")
+        return None
+
+def generate_task_gemini(prompt):
+    if not GEMINI_API_KEY:
+        print("Error: GEMINI_API_KEY not found.")
+        return None
+
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL_NAME}:generateContent?key={GEMINI_API_KEY}"
     
     payload = {
-        "contents": [
-            {
-                "parts": [
-                    {"text": prompt}
-                ]
-            }
-        ],
-        "generationConfig": {
-            "response_mime_type": "application/json",
-        }
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {"response_mime_type": "application/json"}
     }
 
-    # Add retry logic for API calls
     max_retries = 3
     for attempt in range(max_retries):
         try:
             response = requests.post(url, json=payload)
-            if response.status_code == 429: # Rate limit
+            if response.status_code == 429:
                 wait_time = (attempt + 1) * 5
-                print(f"  Rate limit hit, waiting {wait_time}s...")
                 time.sleep(wait_time)
                 continue
-                
             if response.status_code != 200:
                 print(f"  API Error {response.status_code}: {response.text}")
-                if attempt == max_retries - 1:
-                    return None
-                time.sleep(5)
-                continue
+                return None
 
             result = response.json()
-            
             if 'candidates' in result and result['candidates']:
                 content_text = result['candidates'][0]['content']['parts'][0]['text']
                 return json.loads(content_text)
-            else:
-                print(f"  No candidates in response: {result}")
-                return None
         except Exception as e:
-            print(f"  Error on attempt {attempt+1}: {e}")
-            if attempt == max_retries - 1:
-                return None
+            print(f"  Error: {e}")
             time.sleep(2)
-            
     return None
 
+def generate_task_ollama(prompt):
+    url = f"{OLLAMA_HOST}/api/generate"
+    
+    # Force JSON response in prompt if provider is Ollama and doesn't support format: json
+    # (Deepseek-coder-v2 should be fine if we ask for JSON)
+    
+    payload = {
+        "model": MODEL_NAME,
+        "prompt": prompt,
+        "format": "json",
+        "stream": False
+    }
+
+    try:
+        response = requests.post(url, json=payload)
+        if response.status_code != 200:
+            print(f"  Ollama Error {response.status_code}: {response.text}")
+            return None
+        
+        result = response.json()
+        content_text = result.get('response', '')
+        return json.loads(content_text)
+    except Exception as e:
+        print(f"  Error: {e}")
+        return None
+
 def main():
+    print(f"Using Model Provider: {MODEL_PROVIDER}")
+    print(f"Model Name: {MODEL_NAME}")
+    
+    if MODEL_PROVIDER == "gemini" and not GEMINI_API_KEY:
+        print("Error: GEMINI_API_KEY not found in .env")
+        sys.exit(1)
+
     print("Scraping Drupal 11 Change Records...")
     records = scrape_change_records(limit=3)
     print(f"Found {len(records)} records.")

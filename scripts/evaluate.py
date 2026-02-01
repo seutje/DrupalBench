@@ -9,16 +9,21 @@ import re
 # Add the project root to sys.path to allow importing from scripts if needed
 sys.path.append(os.getcwd())
 
-def get_api_key():
+def load_env():
+    env = {}
     if os.path.exists(".env"):
         with open(".env", "r") as f:
             for line in f:
-                if line.startswith("GEMINI_API_KEY="):
-                    return line.split("=", 1)[1].strip()
-    return os.getenv("GEMINI_API_KEY")
+                if "=" in line and not line.startswith("#"):
+                    key, value = line.split("=", 1)
+                    env[key.strip()] = value.strip()
+    return env
 
-API_KEY = get_api_key()
-MODEL_NAME = "gemini-3-flash-preview"
+ENV = load_env()
+MODEL_PROVIDER = ENV.get("MODEL_PROVIDER", "gemini")
+MODEL_NAME = ENV.get("MODEL_NAME", "gemini-3-flash-preview")
+GEMINI_API_KEY = ENV.get("GEMINI_API_KEY")
+OLLAMA_HOST = ENV.get("OLLAMA_HOST", "http://localhost:11434")
 
 def run_command(command, shell=True):
     try:
@@ -27,21 +32,27 @@ def run_command(command, shell=True):
     except Exception as e:
         return False, "", str(e)
 
-def call_gemini(prompt):
-    if not API_KEY:
-        return None, "GEMINI_API_KEY not found."
-
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL_NAME}:generateContent?key={API_KEY}"
-    
-    # System instruction to ensure we get a git patch
-    full_prompt = f"""You are an expert Drupal 11 developer. 
+def call_model(prompt):
+    system_instruction = """You are an expert Drupal 11 developer. 
 Solve the following problem by providing a valid git diff (patch).
 The patch should be applicable to a standard Drupal 11 installation using `patch -p1`.
 Output ONLY the git diff. Do not include markdown code blocks like ```diff unless strictly necessary, but prefer raw text if possible. If you use code blocks, ensure they are correctly formatted.
-
-Problem Description:
-{prompt}
 """
+    
+    if MODEL_PROVIDER == "gemini":
+        return call_gemini(prompt, system_instruction)
+    elif MODEL_PROVIDER == "ollama":
+        return call_ollama(prompt, system_instruction)
+    else:
+        return None, f"Unknown model provider: {MODEL_PROVIDER}"
+
+def call_gemini(prompt, system_instruction):
+    if not GEMINI_API_KEY:
+        return None, "GEMINI_API_KEY not found."
+
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL_NAME}:generateContent?key={GEMINI_API_KEY}"
+    
+    full_prompt = f"{system_instruction}\n\nProblem Description:\n{prompt}"
 
     payload = {
         "contents": [{"parts": [{"text": full_prompt}]}]
@@ -55,20 +66,45 @@ Problem Description:
         result = response.json()
         if 'candidates' in result and result['candidates']:
             text = result['candidates'][0]['content']['parts'][0]['text']
-            # Extract diff if wrapped in markdown
-            if "```" in text:
-                match = re.search(r'```(?:diff|patch|php)?\s*(.*?)\s*```', text, re.DOTALL)
-                if match:
-                    text = match.group(1)
-            
-            # Remove any leading text before 'diff --git'
-            if 'diff --git' in text:
-                text = text[text.find('diff --git'):]
-            
-            return text.strip(), None
+            return clean_patch_output(text), None
         return None, "No candidates in response."
     except Exception as e:
         return None, str(e)
+
+def call_ollama(prompt, system_instruction):
+    url = f"{OLLAMA_HOST}/api/generate"
+    
+    full_prompt = f"{system_instruction}\n\nProblem Description:\n{prompt}"
+
+    payload = {
+        "model": MODEL_NAME,
+        "prompt": full_prompt,
+        "stream": False
+    }
+
+    try:
+        response = requests.post(url, json=payload)
+        if response.status_code != 200:
+            return None, f"Ollama Error {response.status_code}: {response.text}"
+        
+        result = response.json()
+        text = result.get('response', '')
+        return clean_patch_output(text), None
+    except Exception as e:
+        return None, str(e)
+
+def clean_patch_output(text):
+    # Extract diff if wrapped in markdown
+    if "```" in text:
+        match = re.search(r'```(?:diff|patch|php)?\s*(.*?)\s*```', text, re.DOTALL)
+        if match:
+            text = match.group(1)
+    
+    # Remove any leading text before 'diff --git'
+    if 'diff --git' in text:
+        text = text[text.find('diff --git'):]
+    
+    return text.strip()
 
 def reset_environment():
     print("  Resetting environment...")
@@ -85,9 +121,9 @@ def evaluate_task(task, samples_per_task=1):
         print(f"  Sample {i+1}/{samples_per_task}...")
         reset_environment()
         
-        patch, error = call_gemini(task['prompt'])
+        patch, error = call_model(task['prompt'])
         if error or patch is None:
-            print(f"    Error calling Gemini: {error or 'No patch returned'}")
+            print(f"    Error calling model: {error or 'No patch returned'}")
             sample_results.append({"passed": False, "error": error or "No patch returned"})
             continue
 
@@ -98,7 +134,6 @@ def evaluate_task(task, samples_per_task=1):
         run_command("docker cp temp.patch $(docker-compose ps -q drupal):/var/www/html/task.patch")
         
         # Apply patch
-        # We'll use the file on the host and redirect it to stdin of the patch command in the container
         success, stdout, stderr = run_command(f"docker-compose exec -T drupal patch -p1 < temp.patch")
         if not success:
             print(f"    FAILED to apply patch: {stderr or stdout}")
@@ -106,18 +141,15 @@ def evaluate_task(task, samples_per_task=1):
             continue
 
         # Run Domain Validators
-        # We need to find which files were changed to pass them to validators
-        # For simplicity, we'll run validators on common locations or the whole web/modules/custom
         domain_results = {}
         validators_dir = "scripts/validators"
-        for validator in os.listdir(validators_dir):
-            if validator.endswith("_validator.py"):
-                name = validator.replace("_validator.py", "")
-                v_path = os.path.join(validators_dir, validator)
-                # Note: validators currently expect a file path. We might need to adjust them.
-                # For now, we run them on web/modules/custom
-                v_success, v_stdout, v_stderr = run_command(f"python3 {v_path} app/web/modules/custom")
-                domain_results[name] = {"passed": v_success, "output": v_stdout + v_stderr}
+        if os.path.exists(validators_dir):
+            for validator in os.listdir(validators_dir):
+                if validator.endswith("_validator.py"):
+                    name = validator.replace("_validator.py", "")
+                    v_path = os.path.join(validators_dir, validator)
+                    v_success, v_stdout, v_stderr = run_command(f"python3 {v_path} app/web/modules/custom")
+                    domain_results[name] = {"passed": v_success, "output": v_stdout + v_stderr}
 
         # Run PHPUnit
         test_success, test_stdout, test_stderr = run_command("docker-compose exec -T drupal ./vendor/bin/phpunit")
@@ -135,8 +167,7 @@ def evaluate_task(task, samples_per_task=1):
             print("    SUCCESS: All tests passed.")
         else:
             print("    FAILED: Tests did not pass.")
-
-    # Task is passed if at least one sample passed (for pass@k)
+        
     any_passed = any(s.get('passed') for s in sample_results)
     
     return {
@@ -149,13 +180,20 @@ def evaluate_task(task, samples_per_task=1):
     }
 
 def main():
-    if not API_KEY:
-        print("Error: GEMINI_API_KEY not found.")
+    print(f"Using Model Provider: {MODEL_PROVIDER}")
+    print(f"Model Name: {MODEL_NAME}")
+    
+    if MODEL_PROVIDER == "gemini" and not GEMINI_API_KEY:
+        print("Error: GEMINI_API_KEY not found in .env")
         sys.exit(1)
 
     tasks_path = "tasks.json"
     if len(sys.argv) > 1:
         tasks_path = sys.argv[1]
+
+    if not os.path.exists(tasks_path):
+        print(f"Error: Tasks file not found: {tasks_path}")
+        sys.exit(1)
 
     with open(tasks_path, "r") as f:
         tasks = json.load(f)
@@ -166,6 +204,7 @@ def main():
     
     results = {
         "model_name": MODEL_NAME,
+        "model_provider": MODEL_PROVIDER,
         "total_tasks": len(tasks_to_run),
         "total_samples": 0,
         "total_correct": 0,
