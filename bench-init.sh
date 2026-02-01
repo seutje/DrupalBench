@@ -23,8 +23,8 @@ else
     docker-compose exec -T drupal bash -c "composer create-project drupal/recommended-project:^11 . --no-interaction"
     mv health-check.php.tmp app/health-check.php
     
-    echo "Installing Drush 13..."
-    docker-compose exec -T drupal bash -c "composer require drush/drush:^13 --no-interaction"
+    echo "Installing Drush 13 and Dev Dependencies..."
+    docker-compose exec -T drupal bash -c "composer require drush/drush:^13 drupal/core-dev:^11 phpstan/phpstan mglaman/phpstan-drupal drupal/coder --dev -W --no-interaction"
 fi
 
 echo "Installing Drupal site..."
@@ -37,6 +37,12 @@ docker-compose exec -T drupal ./vendor/bin/drush site:install \
 
 echo "Setting permissions..."
 docker-compose exec -T drupal chown -R www-data:www-data web/sites web/modules web/themes
+
+echo "Configuring PHPUnit..."
+docker-compose exec -T drupal bash -c "cp web/core/phpunit.xml.dist web/core/phpunit.xml"
+docker-compose exec -T drupal bash -c "sed -i 's|name=\"SIMPLETEST_DB\" value=\"\"|name=\"SIMPLETEST_DB\" value=\"mysql://drupal:drupal@db/drupal\"|' web/core/phpunit.xml"
+docker-compose exec -T drupal bash -c "sed -i 's|name=\"SIMPLETEST_BASE_URL\" value=\"\"|name=\"SIMPLETEST_BASE_URL\" value=\"http://localhost\"|' web/core/phpunit.xml"
+docker-compose exec -T drupal bash -c "mkdir -p web/sites/simpletest/browser_output && chown -R www-data:www-data web/sites/simpletest"
 
 echo "Initializing git repository for benchmarking..."
 docker-compose exec -T drupal git init

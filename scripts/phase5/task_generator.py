@@ -100,7 +100,9 @@ def generate_task_gemini(prompt):
     
     payload = {
         "contents": [{"parts": [{"text": prompt}]}],
-        "generationConfig": {"response_mime_type": "application/json"}
+        "generationConfig": {
+            "response_mime_type": "application/json"
+        }
     }
 
     max_retries = 3

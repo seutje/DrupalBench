@@ -19,7 +19,11 @@ node_modules/
 
 # Benchmark outputs
 results.json
-temp.patch
+*.patch
+*.orig
+*.rej
+test_file.php
+test_patch/
 
 __pycache__
 *.log
