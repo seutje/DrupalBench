@@ -17,4 +17,8 @@ Thumbs.db
 node_modules/
 .env
 
+# Benchmark outputs
+results.json
+temp.patch
+
 __pycache__
