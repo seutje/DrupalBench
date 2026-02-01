@@ -1,0 +1,49 @@
+[
+  {
+    "model_name": "GPT-4o",
+    "total_tasks": 10,
+    "total_samples": 50,
+    "total_correct": 35,
+    "pass_at_1": 0.7,
+    "pass_at_5": 0.92,
+    "tasks": [
+      {
+        "task_id": "DB-001",
+        "title": "Refactor hook_user_login to EventSubscriber",
+        "passed": true,
+        "quality_summary": "Clean",
+        "domain_results": {
+          "backend": { "passed": true, "output": "Successfully identified attribute usage." }
+        }
+      },
+      {
+        "task_id": "DB-002",
+        "title": "Create SDC for Product Card",
+        "passed": false,
+        "quality_summary": "Missing component.yml",
+        "domain_results": {
+          "frontend": { "passed": false, "output": "Error: component.yml not found." }
+        }
+      }
+    ]
+  },
+  {
+    "model_name": "Claude 3.5 Sonnet",
+    "total_tasks": 10,
+    "total_samples": 50,
+    "total_correct": 42,
+    "pass_at_1": 0.84,
+    "pass_at_5": 0.98,
+    "tasks": [
+      {
+        "task_id": "DB-001",
+        "title": "Refactor hook_user_login to EventSubscriber",
+        "passed": true,
+        "quality_summary": "Clean",
+        "domain_results": {
+          "backend": { "passed": true, "output": "Perfect attribute implementation." }
+        }
+      }
+    ]
+  }
+]

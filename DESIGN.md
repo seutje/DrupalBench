@@ -59,6 +59,23 @@ Perhaps the most sophisticated addition to Drupal 11 is the Access Policy API, w
 
 A successful task completion in this domain requires the model to implement a service class that extends AccessPolicyBase and correctly overrides the calculatePermissions method.22 Crucially, the model must also define the correct cache contexts via getPersistentCacheContexts to ensure that permissions are updated when the underlying conditions change.44 Failure to include these cache contexts results in security vulnerabilities or performance degradation, both of which are flagged by the DrupalBench evaluation harness.22
 
+## **Frontend Visualization and Comparative Analysis**
+
+To facilitate the interpretation of benchmark results, DrupalBench includes a web-based dashboard built with Vite, React, and Tailwind CSS. This interface serves as the primary consumption layer for researchers and developers to compare model performance across the four architectural pillars.
+
+### **Multi-Model Dashboard**
+
+The dashboard provides a high-level overview of all models evaluated by the DrupalBench harness. It visualizes critical metrics such as pass@1 and pass@5, enabling a direct comparison of different LLM architectures and training methodologies. The use of Tailwind CSS ensures a responsive, "developer-centric" dark-themed aesthetic that aligns with modern engineering tools.
+
+### **Granular Task Inspection**
+
+For each model, the dashboard offers a detailed breakdown of performance on a task-by-task basis. This includes:
+* **Functional Correctness:** Pass/fail status based on PHPUnit test execution.
+* **Domain Validation:** Specific results from the Backend, Frontend (SDC), Recipes, and Security validators.
+* **Code Quality Metrics:** Feedback from PHPCS and PHPStan analysis.
+
+This level of granularity allows developers to identify specific failure modes—such as a model's tendency to use deprecated annotations instead of attributes—and adjust fine-tuning strategies accordingly.
+
 ## **Dataset Curation and Evaluation Harness Design**
 
 The validity of DrupalBench rests on the quality of its task instances and the rigor of its execution environment. Following the "SWE-bench" model, DrupalBench utilizes real-world data from the Drupal community to ensure that the benchmark is not merely theoretical but reflects the actual work of software engineers.18
