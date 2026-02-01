@@ -38,6 +38,13 @@ docker-compose exec -T drupal ./vendor/bin/drush site:install \
 echo "Setting permissions..."
 docker-compose exec -T drupal chown -R www-data:www-data web/sites web/modules web/themes
 
+echo "Initializing git repository for benchmarking..."
+docker-compose exec -T drupal git init
+docker-compose exec -T drupal git config user.email "bench@example.com"
+docker-compose exec -T drupal git config user.name "DrupalBench"
+docker-compose exec -T drupal git add .
+docker-compose exec -T drupal git commit -m "Initial Drupal 11 installation"
+
 echo "Running Health Check..."
 docker-compose exec -T drupal php /var/www/html/health-check.php
 
