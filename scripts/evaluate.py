@@ -188,31 +188,46 @@ def main():
         sys.exit(1)
 
     tasks_path = "tasks.json"
+    synthetic_tasks_path = "synthetic_tasks.json"
     if len(sys.argv) > 1:
         tasks_path = sys.argv[1]
 
-    if not os.path.exists(tasks_path):
-        print(f"Error: Tasks file not found: {tasks_path}")
+    all_tasks = []
+    if os.path.exists(tasks_path):
+        with open(tasks_path, "r") as f:
+            all_tasks.extend(json.load(f))
+    else:
+        print(f"Warning: Tasks file not found: {tasks_path}")
+
+    if os.path.exists(synthetic_tasks_path):
+        with open(synthetic_tasks_path, "r") as f:
+            all_tasks.extend(json.load(f))
+    else:
+        print(f"Warning: Synthetic tasks file not found: {synthetic_tasks_path}")
+
+    if not all_tasks:
+        print("Error: No tasks found to evaluate.")
         sys.exit(1)
 
-    with open(tasks_path, "r") as f:
-        tasks = json.load(f)
-
-    # For testing, limit to first 1 tasks
-    test_limit = 1
-    tasks_to_run = tasks[:test_limit]
+    # Use samples_per_task=10
+    samples_per_task = 10
     
     results = {
         "model_name": MODEL_NAME,
         "model_provider": MODEL_PROVIDER,
-        "total_tasks": len(tasks_to_run),
+        "total_tasks": len(all_tasks),
         "total_samples": 0,
         "total_correct": 0,
         "tasks": []
     }
 
-    for task in tasks_to_run:
-        task_res = evaluate_task(task, samples_per_task=1)
+    for task in all_tasks:
+        # Ensure task_id exists for results tracking
+        if 'task_id' not in task:
+            # Generate a simple hash/id if missing (e.g. for synthetic tasks)
+            task['task_id'] = f"syn_{hash(task.get('title', '')) & 0xffff}"
+        
+        task_res = evaluate_task(task, samples_per_task=samples_per_task)
         results["tasks"].append(task_res)
         results["total_samples"] += task_res["total_samples"]
         results["total_correct"] += task_res["correct_samples"]
