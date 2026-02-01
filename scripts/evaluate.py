@@ -100,14 +100,23 @@ def clean_patch_output(text):
         if match:
             text = match.group(1)
     
-    # Remove any leading text before 'diff --git'
+    # Remove any leading text before 'diff --git' or '--- '
     if 'diff --git' in text:
         text = text[text.find('diff --git'):]
+    elif '--- ' in text:
+        text = text[text.find('--- '):]
     
-    return text.strip()
+    # Normalize line endings and ensure it ends with a newline
+    text = text.replace('\r\n', '\n')
+    text = text.strip()
+    if text:
+        text += '\n'
+    
+    return text
 
 def reset_environment():
     print("  Resetting environment...")
+    run_command("docker-compose exec -T drupal git config --global --add safe.directory /var/www/html")
     run_command("docker-compose exec -T drupal git reset --hard HEAD")
     run_command("docker-compose exec -T drupal git clean -fd")
 
@@ -131,10 +140,29 @@ def evaluate_task(task, samples_per_task=1):
         with open("temp.patch", "w") as f:
             f.write(patch)
         
-        run_command("docker cp temp.patch $(docker-compose ps -q drupal):/var/www/html/task.patch")
+        # Get container ID more reliably
+        success_id, container_id, _ = run_command("docker-compose ps -q drupal")
+        container_id = container_id.strip()
+        if not container_id:
+            print("    ERROR: Could not find drupal container.")
+            continue
+            
+        run_command(f"docker cp temp.patch {container_id}:/var/www/html/task.patch")
         
         # Apply patch
-        success, stdout, stderr = run_command(f"docker-compose exec -T drupal patch -p1 < temp.patch")
+        # Try applying with -p1 in the web directory first, as most Drupal patches are relative to Drupal root (the 'web' folder in this setup)
+        # Also use -l to ignore whitespace differences and --fuzz=3 for better matching
+        success, stdout, stderr = run_command(f"docker-compose exec -T drupal patch -p1 -l -t -d web -i /var/www/html/task.patch")
+        if not success:
+            # Fallback to root directory if web fails
+            success, stdout, stderr = run_command(f"docker-compose exec -T drupal patch -p1 -l -t -i /var/www/html/task.patch")
+        
+        if not success:
+            # Final attempt with git apply if patch fails
+            success, stdout, stderr = run_command(f"docker-compose exec -T drupal git apply --directory=web /var/www/html/task.patch")
+            if not success:
+                success, stdout, stderr = run_command(f"docker-compose exec -T drupal git apply /var/www/html/task.patch")
+
         if not success:
             print(f"    FAILED to apply patch: {stderr or stdout}")
             sample_results.append({"passed": False, "patch": patch, "error": "Patch application failed"})
