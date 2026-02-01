@@ -2,6 +2,7 @@ import os
 import json
 import requests
 import re
+import time
 
 def get_api_key():
     if os.path.exists(".env"):
@@ -12,43 +13,63 @@ def get_api_key():
     return os.getenv("GEMINI_API_KEY")
 
 GEMINI_API_KEY = get_api_key()
+# The model name provided in the instructions is gemini-3-flash.
+# Standard public names are often gemini-1.5-flash or gemini-2.0-flash.
 MODEL_NAME = "gemini-3-flash"
+
 
 def scrape_change_records(limit=5):
     url = "https://www.drupal.org/list-changes/drupal"
     headers = {"User-Agent": "DrupalBench/0.1"}
+    print(f"Fetching {url}...")
     response = requests.get(url, headers=headers)
     
-    # Simple regex to find links to change records
-    # Example: <td class="views-field views-field-title" >
-    #          <a href="/node/3352256">Single Directory Components is now in core</a>          </td>
+    # Broaden regex to find links to change records
+    links = re.findall(r'<td\s+class="views-field views-field-title"[^>]*>\s*<a\s+href="([^"]+)"[^>]*>([^<]+)</a>', response.text)
     
-    links = re.findall(r'<td class="views-field views-field-title"[^>]*>\s*<a href="(/node/\d+)">([^<]+)</a>', response.text)
+    print(f"Regex found {len(links)} candidate links.")
     
     records = []
-    for href, title in links[:limit]:
-        full_url = "https://www.drupal.org" + href
+    for href, title in links:
+        if len(records) >= limit:
+            break
+            
+        full_url = href if href.startswith('http') else "https://www.drupal.org" + href
+        print(f"Fetching change record: {full_url}...")
         
         # Get the content of the change record
         rec_res = requests.get(full_url, headers=headers)
         
-        # Extract body content - look for the field-name-body div
-        body_match = re.search(r'<div class="field field-name-body[^>]*>(.*?)</div>\s*</div>', rec_res.text, re.DOTALL)
+        # Extract body content - Drupal 7 site uses field-name-field-description
+        body_match = re.search(r'<div class="field field-name-field-description[^>]*>(.*?)</div>\s*</div>', rec_res.text, re.DOTALL)
+        if not body_match:
+            # Fallback for older or different structure
+            body_match = re.search(r'<div class="field field-name-body[^>]*>(.*?)</div>\s*</div>', rec_res.text, re.DOTALL)
+        if not body_match:
+            # Another fallback
+            body_match = re.search(r'<div class="field-item even" property="content:encoded">(.*?)</div>', rec_res.text, re.DOTALL)
+            
         if body_match:
             content = body_match.group(1)
             # Basic HTML tag removal
             content = re.sub(r'<[^>]+>', '', content).strip()
+            # Clean up whitespace
+            content = re.sub(r'\s+', ' ', content)
             
             records.append({
                 "title": title.strip(),
                 "url": full_url,
-                "content": content
+                "content": content[:3000] # Slightly larger limit for more context
             })
+            print(f"  Scraped: {title.strip()}")
+        else:
+            print(f"  WARNING: Could not find body content for {full_url}")
+            
     return records
 
 def generate_task(change_record):
     if not GEMINI_API_KEY:
-        print("Error: GEMINI_API_KEY not found.")
+        print("Error: GEMINI_API_KEY not found in .env or environment.")
         return None
 
     with open("scripts/phase5/task_prompt.txt", "r") as f:
@@ -71,19 +92,37 @@ def generate_task(change_record):
         }
     }
 
-    try:
-        response = requests.post(url, json=payload)
-        response.raise_for_status()
-        result = response.json()
-        
-        if 'candidates' in result and result['candidates']:
-            content_text = result['candidates'][0]['content']['parts'][0]['text']
-            return json.loads(content_text)
-        else:
-            print(f"No candidates in response: {result}")
-    except Exception as e:
-        print(f"Error calling Gemini API: {e}")
-        # response might not be defined if requests.post fails completely
+    # Add retry logic for API calls
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            response = requests.post(url, json=payload)
+            if response.status_code == 429: # Rate limit
+                wait_time = (attempt + 1) * 5
+                print(f"  Rate limit hit, waiting {wait_time}s...")
+                time.sleep(wait_time)
+                continue
+                
+            if response.status_code != 200:
+                print(f"  API Error {response.status_code}: {response.text}")
+                if attempt == max_retries - 1:
+                    return None
+                time.sleep(5)
+                continue
+
+            result = response.json()
+            
+            if 'candidates' in result and result['candidates']:
+                content_text = result['candidates'][0]['content']['parts'][0]['text']
+                return json.loads(content_text)
+            else:
+                print(f"  No candidates in response: {result}")
+                return None
+        except Exception as e:
+            print(f"  Error on attempt {attempt+1}: {e}")
+            if attempt == max_retries - 1:
+                return None
+            time.sleep(2)
             
     return None
 
