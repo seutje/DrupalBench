@@ -560,27 +560,5 @@
         }
       }
     ]
-  },
-  {
-    "model_name": "GPT-4o (Historical)",
-    "total_tasks": 10,
-    "total_samples": 50,
-    "total_correct": 35,
-    "pass_at_1": 0.7,
-    "pass_at_5": 0.92,
-    "tasks": [
-      {
-        "task_id": "DB-001",
-        "title": "Refactor hook_user_login to EventSubscriber",
-        "passed": true,
-        "quality_summary": "Clean",
-        "domain_results": {
-          "backend": {
-            "passed": true,
-            "output": "Successfully identified attribute usage."
-          }
-        }
-      }
-    ]
   }
 ]
