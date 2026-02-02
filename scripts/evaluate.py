@@ -172,6 +172,10 @@ def reset_environment():
     run_command("docker-compose exec -T drupal git config --global --add safe.directory /var/www/html")
     run_command("docker-compose exec -T drupal git reset --hard HEAD")
     run_command("docker-compose exec -T drupal git clean -fd -e vendor/ -e web/sites/default/settings.php -e web/sites/default/files/")
+    # Fix permissions for functional tests
+    run_command("docker-compose exec -T drupal mkdir -p web/sites/simpletest/browser_output")
+    run_command("docker-compose exec -T drupal chown -R www-data:www-data web/sites web/core")
+    run_command("docker-compose exec -T drupal chmod -R 777 web/sites/simpletest")
 
 def unsolve_task(task):
     if 'ground_truth' not in task or not isinstance(task['ground_truth'], str):
@@ -292,8 +296,10 @@ def evaluate_task(task, samples_per_task=1):
         
         if test_path_to_run:
             print(f"    Running tests in {test_path_to_run}...")
-            phpunit_cmd = f"docker-compose exec -T drupal bash -c 'php ./vendor/bin/phpunit -c web/core/phpunit.xml {test_path_to_run}'"
-            test_success, test_stdout, test_stderr = run_command(phpunit_cmd, timeout=300)
+            # Run as www-data from the web directory so relative paths in phpunit.xml work correctly
+            rel_test_path = test_path_to_run[4:] if test_path_to_run.startswith("web/") else test_path_to_run
+            phpunit_cmd = f"docker-compose exec -T -u www-data drupal bash -c 'cd web && timeout 300 ../vendor/bin/phpunit -c core/phpunit.xml {rel_test_path}'"
+            test_success, test_stdout, test_stderr = run_command(phpunit_cmd, timeout=310)
         else:
             print("    No tests run.")
             test_success = True; test_stdout = "No tests"; test_stderr = ""
