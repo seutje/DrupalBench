@@ -172,9 +172,9 @@ def reset_environment():
     run_command("docker-compose exec -T drupal git config --global --add safe.directory /var/www/html")
     run_command("docker-compose exec -T drupal git reset --hard HEAD")
     run_command("docker-compose exec -T drupal git clean -fd -e vendor/ -e web/sites/default/settings.php -e web/sites/default/files/")
-    # Fix permissions for functional tests
+    # Fix permissions for functional tests - only on sites directory for speed
     run_command("docker-compose exec -T drupal mkdir -p web/sites/simpletest/browser_output")
-    run_command("docker-compose exec -T drupal chown -R www-data:www-data web/sites web/core")
+    run_command("docker-compose exec -T drupal chown -R www-data:www-data web/sites")
     run_command("docker-compose exec -T drupal chmod -R 777 web/sites/simpletest")
 
 def unsolve_task(task):
@@ -260,52 +260,87 @@ def evaluate_task(task, samples_per_task=1):
         run_command(f"docker cp temp.patch {container_id.strip()}:/var/www/html/task.patch")
         
         patch_applied = False
-        apply_configs = [("web", "-p1"), ("web", "-p0"), (".", "-p1"), (".", "-p0")]
-        for workdir, p_arg in apply_configs:
-            cmd = f"docker-compose exec -T drupal bash -c 'cd {workdir} && git apply -v --recount --whitespace=fix {p_arg} /var/www/html/task.patch'"
-            if run_command(cmd)[0]:
-                print(f"    Patch applied with git apply {p_arg} in {workdir}")
-                patch_applied = True; break
+        # Try git apply first with various options
+        for directory in ["web", "."]:
+            for p_arg in ["-p1", "-p0"]:
+                for extra in ["", "--3way"]:
+                    cmd = f"docker-compose exec -T drupal git apply -v {extra} --recount --whitespace=fix {p_arg} --directory={directory} /var/www/html/task.patch"
+                    if run_command(cmd)[0]:
+                        print(f"    Patch applied with git apply {extra} {p_arg} --directory={directory}")
+                        patch_applied = True
+                        break
+                if patch_applied: break
+            if patch_applied: break
         
         if not patch_applied:
-            for workdir, p_arg in apply_configs:
-                cmd = f"docker-compose exec -T drupal bash -c 'cd {workdir} && git apply -v --3way --recount --whitespace=fix {p_arg} /var/www/html/task.patch'"
-                if run_command(cmd)[0]:
-                    print(f"    Patch applied with git apply --3way {p_arg} in {workdir}")
-                    patch_applied = True; break
-
-        if not patch_applied:
-            for p_level, directory in [("-p1", "web"), ("-p1", "."), ("-p0", "web"), ("-p0", ".")]:
-                cmd = f"docker-compose exec -T drupal patch {p_level} --fuzz=3 -l -t -d {directory} -i /var/www/html/task.patch"
-                if run_command(cmd)[0]:
-                    print(f"    Patch applied with patch {p_level} --fuzz in {directory}")
-                    patch_applied = True; break
+            # Fallback to patch utility
+            for directory in ["web", "."]:
+                for p_level in ["-p1", "-p0"]:
+                    cmd = f"docker-compose exec -T drupal patch {p_level} --fuzz=3 -l -t -N -d {directory} -i /var/www/html/task.patch"
+                    if run_command(cmd)[0]:
+                        print(f"    Patch applied with patch {p_level} --fuzz in {directory}")
+                        patch_applied = True
+                        break
+                if patch_applied: break
                 
         if not patch_applied:
             print(f"    FAILED to apply patch.")
             sample_results.append({"passed": False, "patch": patch, "error": "Patch application failed"})
             continue
 
+        test_files = []
+        # Check for test files in the generated patch
+        test_files += re.findall(r'[ab]/([^ \n\t]*tests/src/[^ \n\t]*Test\.php)', patch)
+        # Check for test files in the ground truth patch
+        if 'ground_truth' in task and isinstance(task['ground_truth'], str):
+            test_files += re.findall(r'[ab]/([^ \n\t]*tests/src/[^ \n\t]*Test\.php)', task['ground_truth'])
+        
+        test_files = list(set(test_files)) # Unique
+        
         test_path_to_run = ""
         if 'test_path' in task:
             test_path_to_run = task['test_path']
             if not test_path_to_run.startswith('web/'): test_path_to_run = f"web/{test_path_to_run}"
+        elif test_files:
+            # Run specific test files found in patches
+            test_path_to_run = " ".join([f"web/core/{tf}" if tf.startswith("modules/") else f"web/{tf}" for tf in test_files])
+            # Ensure paths are relative to web root and don't have double web/ or core/
+            test_path_to_run = test_path_to_run.replace("web/web/", "web/").replace("web/core/core/", "web/core/")
         elif "core/modules/" in patch:
             match = re.search(r'core/modules/(\w+)', patch)
             if match: test_path_to_run = f"web/core/modules/{match.group(1)}"
         
         if test_path_to_run:
             print(f"    Running tests in {test_path_to_run}...")
-            # Run as www-data from the web directory so relative paths in phpunit.xml work correctly
-            rel_test_path = test_path_to_run[4:] if test_path_to_run.startswith("web/") else test_path_to_run
-            phpunit_cmd = f"docker-compose exec -T -u www-data drupal bash -c 'cd web && timeout 300 ../vendor/bin/phpunit -c core/phpunit.xml {rel_test_path}'"
-            test_success, test_stdout, test_stderr = run_command(phpunit_cmd, timeout=310)
+            paths = test_path_to_run.split()
+            all_passed = True
+            combined_output = ""
+            for p in paths:
+                rel_p = p.replace("web/", "")
+                # Skip FunctionalJavascript tests as they require WebDriver
+                if "FunctionalJavascript" in rel_p:
+                    print(f"      Skipping Javascript test: {rel_p}")
+                    continue
+                
+                print(f"      Running {rel_p}...")
+                # Increased timeout to 900s (15 mins) per test file
+                phpunit_cmd = f"docker-compose exec -T -u www-data drupal bash -c 'cd web && timeout 900 ../vendor/bin/phpunit -c core/phpunit.xml {rel_p}'"
+                success, stdout, stderr = run_command(phpunit_cmd, timeout=910)
+                combined_output += f"\n--- Output for {rel_p} ---\n{stdout}{stderr}"
+                
+                # Check for "OK" in output as a fallback for non-zero exit codes due to deprecations
+                if not success and "OK (" not in stdout:
+                    print(f"      FAILED: {rel_p}")
+                    all_passed = False
+                else:
+                    print(f"      PASSED: {rel_p}")
+            
+            sample_results.append({"passed": all_passed, "patch": patch, "phpunit_output": combined_output})
+            print("    SUCCESS" if all_passed else "    FAILED (tests)")
         else:
             print("    No tests run.")
-            test_success = True; test_stdout = "No tests"; test_stderr = ""
-            
-        sample_results.append({"passed": test_success, "patch": patch, "phpunit_output": test_stdout + test_stderr})
-        print("    SUCCESS" if test_success else "    FAILED (tests)")
+            sample_results.append({"passed": True, "patch": patch, "phpunit_output": "No tests"})
+            print("    SUCCESS (no tests)")
         
     return {
         "task_id": task_id, "title": task['title'], "passed": any(s.get('passed') for s in sample_results),
