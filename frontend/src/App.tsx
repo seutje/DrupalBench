@@ -172,7 +172,7 @@ function App() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {filteredResults.map((model: ModelResult) => (
             <div 
               key={model.model_name}
