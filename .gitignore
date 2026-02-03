@@ -19,6 +19,7 @@ node_modules/
 
 # Benchmark outputs
 results.json
+!/frontend/src/data/results.json
 *.patch
 *.orig
 *.rej
