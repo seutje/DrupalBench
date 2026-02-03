@@ -30,7 +30,7 @@ def calculate_pass_at_k(n, c, k):
 
 def update_frontend():
     results_path = 'results.json'
-    frontend_data_path = 'frontend/src/data/mockResults.json'
+    frontend_data_path = 'frontend/src/data/results.json'
     
     if not os.path.exists(results_path):
         print(f"Error: {results_path} not found.")

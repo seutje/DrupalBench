@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import _mockResults from './data/mockResults.json'
-const mockResults = _mockResults as unknown as ModelResult[];
+import _results from './data/results.json'
+const results = _results as unknown as ModelResult[];
 
 import './App.css'
 
@@ -114,7 +114,7 @@ function App() {
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {mockResults.map((model: ModelResult) => (
+        {results.map((model: ModelResult) => (
           <div 
             key={model.model_name}
             className="bg-gray-800 rounded-xl p-6 border border-gray-700 hover:border-blue-500 transition cursor-pointer group"

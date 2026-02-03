@@ -16,7 +16,7 @@ DrupalBench is a Drupal 11–focused LLM benchmark. It mines real Drupal issues,
 - `scripts/evaluate.py`: run model evaluations and produce `results.json`
 - `scripts/mine_issues.py`: mine Drupal.org issues into `tasks.json`
 - `scripts/phase5/task_generator.py`: generate `synthetic_tasks.json`
-- `scripts/update_frontend.py`: write results into `frontend/src/data/mockResults.json` and build
+- `scripts/update_frontend.py`: write results into `frontend/src/data/results.json` and build
 - `frontend/`: React + Vite dashboard
 
 ## Quick start (environment setup)
@@ -101,7 +101,7 @@ These scripts apply patches inside the Docker container and write filtered outpu
 
 ## Update the frontend
 
-`update_frontend.py` transforms `results.json` into the frontend’s `mockResults.json` and runs a production build.
+`update_frontend.py` transforms `results.json` into `frontend/src/data/results.json` and runs a production build.
 
 ```bash
 python scripts/update_frontend.py
@@ -125,4 +125,4 @@ npm install
 npm run dev
 ```
 
-The dashboard reads `frontend/src/data/mockResults.json`, which is updated by `scripts/update_frontend.py`.
+The dashboard reads `frontend/src/data/results.json`, which is updated by `scripts/update_frontend.py`.
