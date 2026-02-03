@@ -26,6 +26,7 @@ MODEL_PROVIDER = ENV.get("MODEL_PROVIDER", "gemini")
 MODEL_NAME = ENV.get("MODEL_NAME", "gemini-3-flash-preview")
 GEMINI_API_KEY = ENV.get("GEMINI_API_KEY")
 OLLAMA_HOST = ENV.get("OLLAMA_HOST", "http://localhost:11434")
+MODEL_REQUEST_TIMEOUT = 15 * 60  # Hard timeout for model calls (seconds).
 
 def run_command(command, shell=True, timeout=None):
     try:
@@ -61,7 +62,7 @@ def call_gemini(prompt, system_instruction):
     payload = {"contents": [{"parts": [{"text": full_prompt}]}]}
 
     try:
-        response = requests.post(url, json=payload)
+        response = requests.post(url, json=payload, timeout=MODEL_REQUEST_TIMEOUT)
         if response.status_code != 200:
             return None, f"API Error {response.status_code}: {response.text}"
         result = response.json()
@@ -78,7 +79,7 @@ def call_ollama(prompt, system_instruction):
     payload = {"model": MODEL_NAME, "prompt": full_prompt, "stream": False}
 
     try:
-        response = requests.post(url, json=payload)
+        response = requests.post(url, json=payload, timeout=MODEL_REQUEST_TIMEOUT)
         if response.status_code != 200:
             return None, f"Ollama Error {response.status_code}: {response.text}"
         result = response.json()
