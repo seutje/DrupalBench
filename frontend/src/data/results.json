@@ -2,10 +2,10 @@
   {
     "model_name": "qwen2.5-coder:7b",
     "total_tasks": 46,
-    "total_samples": 46,
-    "total_correct": 2,
-    "pass_at_1": 0.043478260869565216,
-    "pass_at_5": 0.043478260869565216,
+    "total_samples": 460,
+    "total_correct": 16,
+    "pass_at_1": 0.03478260869565217,
+    "pass_at_5": 0.13155624568668048,
     "tasks": [
       {
         "task_id": "2381293",
@@ -39,18 +39,18 @@
         "domain_results": {
           "backend": {
             "passed": true,
-            "output": "\n--- Output for core/modules/migrate/tests/src/Functional/process/DownloadFunctionalTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n.                                                                   1 / 1 (100%)\n\nHTML output was generated.\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_migrate_Functional_process_DownloadFunctionalTest-1-36402282.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_migrate_Functional_process_DownloadFunctionalTest-2-36402282.html\n\n\nTime: 00:09.063, Memory: 10.00 MB\n\nOK (1 test, 10 assertions)\n"
+            "output": "No output available"
           }
         }
       },
       {
         "task_id": "2486267",
         "title": "Attributes of a block content are applied to block itself",
-        "passed": false,
-        "quality_summary": "Patch application failed",
+        "passed": true,
+        "quality_summary": "Clean",
         "domain_results": {
           "backend": {
-            "passed": false,
+            "passed": true,
             "output": "No output available"
           }
         }
@@ -82,11 +82,11 @@
       {
         "task_id": "3544395",
         "title": "Current user missing from language negotiator outside of request context",
-        "passed": false,
-        "quality_summary": "Patch application failed",
+        "passed": true,
+        "quality_summary": "Clean",
         "domain_results": {
           "backend": {
-            "passed": false,
+            "passed": true,
             "output": "No output available"
           }
         }
@@ -106,11 +106,11 @@
       {
         "task_id": "2229617",
         "title": "Change form element access bypass default to FALSE on programmatic submissions.",
-        "passed": false,
-        "quality_summary": "Patch application failed",
+        "passed": true,
+        "quality_summary": "Clean",
         "domain_results": {
           "backend": {
-            "passed": false,
+            "passed": true,
             "output": "No output available"
           }
         }
@@ -118,12 +118,12 @@
       {
         "task_id": "3478097",
         "title": "MySQL no longer recommended and remove Percona",
-        "passed": false,
-        "quality_summary": "Test Failures",
+        "passed": true,
+        "quality_summary": "Clean",
         "domain_results": {
           "backend": {
-            "passed": false,
-            "output": "\n--- Output for core/modules/mysql/tests/src/Unit/InstallTasksTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\nE                                                                   1 / 1 (100%)\n\nTime: 00:00.016, Memory: 12.00 MB\n\nThere was 1 PHPUnit error:\n\n1) Drupal\\Tests\\mysql\\Unit\\InstallTasksTest::testNameAndMinimumVersion\nThe data provider specified for Drupal\\Tests\\mysql\\Unit\\InstallTasksTest::testNameAndMinimumVersion is invalid\nClass \"Drupal\\mysql\\Driver\\Database\\mysql\\Install\\InstallTasks\" not found\n\n/var/www/html/web/core/modules/mysql/tests/src/Unit/InstallTasksTest.php:124\n\n--\n\nThere was 1 error:\n\n1) Drupal\\Tests\\mysql\\Unit\\InstallTasksTest::testNameWithNoConnection\nProphecy\\Exception\\Doubler\\ClassNotFoundException: Cannot prophesize class Drupal\\Tests\\mysql\\Unit\\Connection, because it cannot be found.\n\n/var/www/html/vendor/phpspec/prophecy/src/Prophecy/Prophet.php:96\n/var/www/ht"
+            "passed": true,
+            "output": "No output available"
           }
         }
       },
@@ -143,11 +143,11 @@
         "task_id": "3441503",
         "title": "Add validation constraints to system.theme",
         "passed": false,
-        "quality_summary": "Patch application failed",
+        "quality_summary": "Test Failures",
         "domain_results": {
           "backend": {
             "passed": false,
-            "output": "No output available"
+            "output": "\n--- Output for core/modules/views/tests/src/Functional/Plugin/DisplayPageWebTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\nEEEEE                                                               5 / 5 (100%)\n\nTime: 00:05.876, Memory: 10.00 MB\n\nThere were 5 errors:\n\n1) Drupal\\Tests\\views\\Functional\\Plugin\\DisplayPageWebTest::testArguments\nLogicException: The mapping definition at `system.image` is invalid: its `type` key contains a string. It must be an array.\n\n/var/www/html/web/core/lib/Drupal/Core/Config/Schema/Mapping.php:35\n/var/www/html/web/core/lib/Drupal/Core/TypedData/TypedData.php:47\n/var/www/html/web/core/lib/Drupal/Core/TypedData/TypedDataManager.php:99\n/var/www/html/web/core/lib/Drupal/Core/TypedData/TypedDataManager.php:108\n/var/www/html/web/core/lib/Drupal/Core/Config/TypedConfigManager.php:429\n/var/www/html/web/core/lib/Drupal/Core/Config/Schema/SchemaCheckTrait.php:100\n/var/w"
           }
         }
       },
@@ -166,12 +166,12 @@
       {
         "task_id": "2954725",
         "title": "AccountInterface::getLastAccessedTime() implementors return incorrect data type",
-        "passed": true,
-        "quality_summary": "Clean",
+        "passed": false,
+        "quality_summary": "Patch application failed",
         "domain_results": {
           "backend": {
-            "passed": true,
-            "output": "\n--- Output for core/modules/user/tests/src/Kernel/UserEntityTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n...                                                                 3 / 3 (100%)\n\nTime: 00:02.850, Memory: 10.00 MB\n\nOK (3 tests, 28 assertions)\n\n--- Output for core/modules/user/tests/src/Kernel/Migrate/d6/MigrateUserTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n.                                                                   1 / 1 (100%)\n\nTime: 00:13.887, Memory: 12.00 MB\n\nOK (1 test, 108 assertions)\n"
+            "passed": false,
+            "output": "No output available"
           }
         }
       },
@@ -191,11 +191,11 @@
         "task_id": "3513035",
         "title": "New NoEntitiesExistYetWithHigherCardinality constraint",
         "passed": false,
-        "quality_summary": "Test Failures",
+        "quality_summary": "Patch application failed",
         "domain_results": {
           "backend": {
             "passed": false,
-            "output": "\n--- Output for core/modules/field/tests/src/Kernel/Plugin/Validation/Constraint/NoEntitiesExistYetWithHigherCardinalityTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nTest file \"core/modules/field/tests/src/Kernel/Plugin/Validation/Constraint/NoEntitiesExistYetWithHigherCardinalityTest.php\" not found\n\n--- Output for core/modules/field/tests/src/Unit/Plugin/Validation/Constraint/NoEntitiesExistYetWithHigherCardinalityTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nTest file \"core/modules/field/tests/src/Unit/Plugin/Validation/Constraint/NoEntitiesExistYetWithHigherCardinalityTest.php\" not found\n"
+            "output": "No output available"
           }
         }
       },
@@ -203,11 +203,11 @@
         "task_id": "3538681",
         "title": "Add support for selecting the dropbutton_type with the Views dropbutton field",
         "passed": false,
-        "quality_summary": "Test Failures",
+        "quality_summary": "HTTPConnectionPool(host='127.0.0.1', port=11434): Read timed out. (read timeout=900)",
         "domain_results": {
           "backend": {
             "passed": false,
-            "output": "\n--- Output for core/modules/views/tests/src/Functional/Handler/FieldDropButtonTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\nE                                                                   1 / 1 (100%)\n\nTime: 00:10.927, Memory: 10.00 MB\n\nThere was 1 error:\n\n1) Drupal\\Tests\\views\\Functional\\Handler\\FieldDropButtonTest::testDropbutton\nTypeError: Cannot access offset of type string on string\n\n/var/www/html/web/core/modules/views/src/Plugin/views/display/DisplayPluginBase.php:856\n/var/www/html/web/core/modules/views/src/Plugin/views/display/DisplayPluginBase.php:916\n/var/www/html/web/core/modules/views/src/Plugin/views/display/DisplayPluginBase.php:953\n/var/www/html/web/core/lib/Drupal/Core/Plugin/PluginDependencyTrait.php:71\n/var/www/html/web/core/lib/Drupal/Core/Plugin/PluginDependencyTrait.php:89\n/var/www/html/web/core/modules/views/src/Entity/View.php:283\n/var/www/html/web/core/lib/"
+            "output": "No output available"
           }
         }
       },
@@ -215,11 +215,11 @@
         "task_id": "3569778",
         "title": "Fix link in \\Drupal\\Tests\\package_manager\\Kernel\\TestSandboxManager::__sleep doc",
         "passed": false,
-        "quality_summary": "Patch application failed",
+        "quality_summary": "Test Failures",
         "domain_results": {
           "backend": {
             "passed": false,
-            "output": "No output available"
+            "output": "\n--- Output for core/modules/package_manager ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\nEEEE...FFFFFFEFFFFFF.......................FFFFFFFFFFEFFFFEEEEE  63 / 497 ( 12%)\nEEEEEEEFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFF.FF.FF..FFFFFFFF..EFFFF 126 / 497 ( 25%)\nFFFFFFFFFFFFFFFFFEEEEEEEEEEEEFFFFFFFF......FFFFFFF.EEEEE..FFFFF 189 / 497 ( 38%)\nFEEFFFFFFFFFFFEEEEEEFFFFFFFEEEEEEEEEEEEFSFEFFFFFFFEFFFFFFFFF... 252 / 497 ( 50%)\n..................FFEE.EEEEEEEEEEFFFEFFEEE.FFFFEEEEEEEEEEEEEEEF 315 / 497 ( 63%)\nFF.EFFFFFFFEEEEEEEEEEEEEEFFFFFFFFFFFFFFFFEFFS.FFFFFFFFFFFFFFFFF 378 / 497 ( 76%)\nFF............................................................. 441 / 497 ( 88%)\n........................................................        497 / 497 (100%)\n\nHTML output was generated.\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_package_manager_Functional_ComposerRequirementTest-1-45803049.html\nhttp://local"
           }
         }
       },
@@ -238,11 +238,11 @@
       {
         "task_id": "3555670",
         "title": "Deprecate user_load_by_mail & user_load_by_name",
-        "passed": false,
-        "quality_summary": "Patch application failed",
+        "passed": true,
+        "quality_summary": "Clean",
         "domain_results": {
           "backend": {
-            "passed": false,
+            "passed": true,
             "output": "No output available"
           }
         }
@@ -250,11 +250,11 @@
       {
         "task_id": "3568387",
         "title": "Deprecate text_summary and move to Help Class",
-        "passed": false,
-        "quality_summary": "Patch application failed",
+        "passed": true,
+        "quality_summary": "Clean",
         "domain_results": {
           "backend": {
-            "passed": false,
+            "passed": true,
             "output": "No output available"
           }
         }
@@ -298,11 +298,11 @@
       {
         "task_id": "3568124",
         "title": "Deprecate remaining functions in media.module",
-        "passed": false,
-        "quality_summary": "HTTPConnectionPool(host='127.0.0.1', port=11434): Read timed out. (read timeout=900)",
+        "passed": true,
+        "quality_summary": "Clean",
         "domain_results": {
           "backend": {
-            "passed": false,
+            "passed": true,
             "output": "No output available"
           }
         }
@@ -335,11 +335,11 @@
         "task_id": "3567137",
         "title": "Add test coverage for duplicate node titles on content_moderation latest version page",
         "passed": false,
-        "quality_summary": "Test Failures",
+        "quality_summary": "Patch application failed",
         "domain_results": {
           "backend": {
             "passed": false,
-            "output": "\n--- Output for core/modules/content_moderation/tests/src/Functional/ModerationStateNodeTest.php ---\n\n\nAn error occurred inside PHPUnit.\n\nMessage:  syntax error, unexpected identifier \"parent\", expecting \"function\"\nLocation: /var/www/html/web/core/modules/content_moderation/tests/src/Functional/ModerationStateNodeTest.php:25\n\n#0 /var/www/html/vendor/phpunit/phpunit/src/Runner/TestSuiteLoader.php(49): PHPUnit\\Runner\\TestSuiteLoader->loadSuiteClassFile('/var/www/html/w...')\n#1 /var/www/html/vendor/phpunit/phpunit/src/TextUI/Configuration/TestSuiteBuilder.php(113): PHPUnit\\Runner\\TestSuiteLoader->load('/var/www/html/w...')\n#2 /var/www/html/vendor/phpunit/phpunit/src/TextUI/Configuration/TestSuiteBuilder.php(58): PHPUnit\\TextUI\\Configuration\\TestSuiteBuilder->testSuiteFromPath('/var/www/html/w...', Array)\n#3 /var/www/html/vendor/phpunit/phpunit/src/TextUI/Application.php(412): PHPUnit\\TextUI\\Configuration\\TestSuiteBuilder->build(Object(PHPUnit\\TextUI\\Configuration\\Configuration))\n#4 /var/w"
+            "output": "No output available"
           }
         }
       },
@@ -394,11 +394,11 @@
       {
         "task_id": "3565218",
         "title": "[random test failure] ResponsiveImageFieldUiTest::testResponsiveImageFormatterUi()",
-        "passed": false,
-        "quality_summary": "Patch application failed",
+        "passed": true,
+        "quality_summary": "Clean",
         "domain_results": {
           "backend": {
-            "passed": false,
+            "passed": true,
             "output": "No output available"
           }
         }
@@ -406,11 +406,11 @@
       {
         "task_id": "3472008",
         "title": "Avoid JSON:API schema validation by default when assert is enabled",
-        "passed": false,
-        "quality_summary": "Patch application failed",
+        "passed": true,
+        "quality_summary": "Clean",
         "domain_results": {
           "backend": {
-            "passed": false,
+            "passed": true,
             "output": "No output available"
           }
         }
@@ -431,11 +431,11 @@
         "task_id": "1522154",
         "title": "Saving non-default revisions shouldn't trigger a search reindex",
         "passed": false,
-        "quality_summary": "Test Failures",
+        "quality_summary": "Patch application failed",
         "domain_results": {
           "backend": {
             "passed": false,
-            "output": "\n--- Output for core/modules/node/tests/src/Kernel/NodeSearchTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nTest file \"core/modules/node/tests/src/Kernel/NodeSearchTest.php\" not found\n"
+            "output": "No output available"
           }
         }
       },
@@ -543,7 +543,7 @@
         "domain_results": {
           "backend": {
             "passed": false,
-            "output": "\n--- Output for modules/custom/history_access_migrator/tests/src/Kernel/HistoryAccessPolicyTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\nE                                                                   1 / 1 (100%)\n\nTime: 00:00.256, Memory: 10.00 MB\n\nThere was 1 error:\n\n1) Drupal\\Tests\\history_access_migrator\\Kernel\\HistoryAccessPolicyTest::testCalculatePermissions\nPHPUnit\\Framework\\Exception: Unavailable module: 'history_access_migrator'. If this module needs to be downloaded for testing, include it in the 'require-dev' section of your composer.json file.\n\n/var/www/html/web/core/tests/Drupal/KernelTests/KernelTestBase.php:518\n/var/www/html/web/core/tests/Drupal/KernelTests/KernelTestBase.php:366\n/var/www/html/web/core/tests/Drupal/KernelTests/KernelTestBase.php:249\n/var/www/html/web/modules/custom/history_access_migrator/tests/src/Kernel/HistoryAccessPolicyTest.php:32\n\n--\n\n1 test tr"
+            "output": "\n--- Output for modules/custom/history_access_migrator/tests/src/Kernel/HistoryAccessPolicyTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\nE                                                                   1 / 1 (100%)\n\nTime: 00:00.361, Memory: 10.00 MB\n\nThere was 1 error:\n\n1) Drupal\\Tests\\history_access_migrator\\Kernel\\HistoryAccessPolicyTest::testCalculatePermissions\nError: Interface \"Drupal\\history_access_migrator\\Access\\AccessPolicyInterface\" not found\n\n/var/www/html/web/core/modules/history_access_migrator/src/Access/HistoryAccessPolicy.php:16\n/var/www/html/vendor/symfony/error-handler/DebugClassLoader.php:307\n/var/www/html/web/core/lib/Drupal/Core/DependencyInjection/Compiler/TaggedHandlersPass.php:184\n/var/www/html/web/core/lib/Drupal/Core/DependencyInjection/Compiler/TaggedHandlersPass.php:118\n/var/www/html/vendor/symfony/dependency-injection/Compiler/Compiler.php:73\n/var/www/htm"
           }
         }
       },
