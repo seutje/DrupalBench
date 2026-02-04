@@ -28,6 +28,8 @@ interface ModelResult {
   tasks: Task[];
 }
 
+const isSyntheticTaskId = (taskId: string) => taskId.startsWith('syn');
+
 function App() {
   const [selectedModel, setSelectedModel] = useState<ModelResult | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -93,7 +95,20 @@ function App() {
               <tbody>
                 {selectedModel.tasks.map(task => (
                   <tr key={task.task_id} className="border-t border-gray-700">
-                    <td className="p-4 font-mono text-sm">{task.task_id}</td>
+                    <td className="p-4 font-mono text-sm">
+                      {isSyntheticTaskId(task.task_id) ? (
+                        task.task_id
+                      ) : (
+                        <a
+                          href={`https://drupal.org/i/${task.task_id}`}
+                          className="text-sky-300 hover:text-sky-200 underline"
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          {task.task_id}
+                        </a>
+                      )}
+                    </td>
                     <td className="p-4">{task.title}</td>
                     <td className="p-4">
                       <div className="flex flex-col space-y-1">
