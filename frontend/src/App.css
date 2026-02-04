@@ -230,3 +230,30 @@
   font-size: 0.75rem;
   color: rgba(148, 163, 184, 0.9);
 }
+
+.page-content {
+  position: relative;
+  z-index: 1;
+  min-height: calc(100vh - 120px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 0 64px;
+}
+
+.diagram-image {
+  max-width: min(1100px, 92vw);
+  max-height: 80vh;
+  border-radius: 20px;
+  box-shadow: 0 30px 60px rgba(15, 23, 42, 0.45);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.contact-card {
+  padding: 28px 32px;
+  border-radius: 20px;
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.35);
+  min-width: min(420px, 90vw);
+}
