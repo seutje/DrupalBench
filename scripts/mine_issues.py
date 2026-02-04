@@ -69,12 +69,14 @@ def main():
     print(f"Loaded {len(tasks)} existing tasks.")
     target_tasks = 300
     
-    # Statuses: RTBC(14), Fixed(2), Closed(fixed)(7)
-    projects = ["3060", "22025", "24719", "3266", "282134", "1818290", "2110197", "1106096", "2544710"]
+    
+    # Drupal.org project IDs to mine, only Core for now.
+    projects = ["3060"]
     for project in projects:
         if len(tasks) >= target_tasks:
             break
         print(f"Checking project {project}...")
+        # Statuses: RTBC(14), Fixed(2), Closed(fixed)(7)
         for status in ["2", "7", "14"]:
             if len(tasks) >= target_tasks:
                 break
