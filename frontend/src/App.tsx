@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import _results from './data/results.json'
 import diagram from './assets/diagram.jpeg'
 const results = _results as unknown as ModelResult[];
@@ -30,15 +30,65 @@ interface ModelResult {
 
 const isSyntheticTaskId = (taskId: string) => taskId.startsWith('syn');
 
+type HistoryState = {
+  page: 'home' | 'about' | 'contact';
+  modelName?: string;
+};
+
 function App() {
   const [selectedModel, setSelectedModel] = useState<ModelResult | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activePage, setActivePage] = useState<'home' | 'about' | 'contact'>('home');
 
+  const applyHistoryState = (state?: HistoryState | null) => {
+    if (!state || state.page === 'home') {
+      setActivePage('home');
+      if (state?.modelName) {
+        const model = results.find((item) => item.model_name === state.modelName) ?? null;
+        setSelectedModel(model);
+      } else {
+        setSelectedModel(null);
+      }
+      return;
+    }
+    setSelectedModel(null);
+    setActivePage(state.page);
+  };
+
   const navigateTo = (page: 'home' | 'about' | 'contact') => {
     setSelectedModel(null);
     setActivePage(page);
+    window.history.pushState({ page } satisfies HistoryState, '', window.location.href);
   };
+
+  const openModelDetails = (model: ModelResult) => {
+    setSelectedModel(model);
+    setActivePage('home');
+    window.history.pushState(
+      { page: 'home', modelName: model.model_name } satisfies HistoryState,
+      '',
+      window.location.href
+    );
+  };
+
+  const returnToOverview = () => {
+    setSelectedModel(null);
+    setActivePage('home');
+    window.history.replaceState({ page: 'home' } satisfies HistoryState, '', window.location.href);
+  };
+
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      applyHistoryState(event.state as HistoryState | null);
+    };
+    window.addEventListener('popstate', handlePopState);
+    if (!window.history.state) {
+      window.history.replaceState({ page: 'home' } satisfies HistoryState, '', window.location.href);
+    } else {
+      applyHistoryState(window.history.state as HistoryState);
+    }
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   const filteredResults = useMemo(() => {
     if (!searchQuery.trim()) {
@@ -52,7 +102,7 @@ function App() {
     return (
       <div className="app-shell text-white p-8">
         <button 
-          onClick={() => setSelectedModel(null)}
+          onClick={returnToOverview}
           className="mb-6 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded transition"
         >
           &larr; Back to Overview
@@ -233,7 +283,7 @@ function App() {
                 <div 
                   key={model.model_name}
                   className="glass-card"
-                  onClick={() => setSelectedModel(model)}
+                  onClick={() => openModelDetails(model)}
                 >
                   <h3 className="text-lg md:text-xl font-semibold mb-6 text-white/90">
                     {model.model_name}
