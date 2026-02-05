@@ -267,7 +267,7 @@
 }
 
 .diagram-image {
-  max-width: min(1100px, 92vw);
+  max-width: min(2800px, 92vw);
   max-height: 80vh;
   border-radius: 20px;
   box-shadow: 0 30px 60px rgba(15, 23, 42, 0.45);
