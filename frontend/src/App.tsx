@@ -39,6 +39,7 @@ function App() {
   const [selectedModel, setSelectedModel] = useState<ModelResult | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activePage, setActivePage] = useState<'home' | 'about' | 'contact'>('home');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const applyHistoryState = (state?: HistoryState | null) => {
     if (!state || state.page === 'home') {
@@ -58,6 +59,7 @@ function App() {
   const navigateTo = (page: 'home' | 'about' | 'contact') => {
     setSelectedModel(null);
     setActivePage(page);
+    setMobileMenuOpen(false);
     window.history.pushState({ page } satisfies HistoryState, '', window.location.href);
   };
 
@@ -210,12 +212,39 @@ function App() {
             Contact
           </button>
         </div>
-        <button className="menu-button" aria-label="Open menu">
+        <button
+          className="menu-button"
+          aria-label="Toggle menu"
+          aria-expanded={mobileMenuOpen}
+          onClick={() => setMobileMenuOpen((open) => !open)}
+        >
           <span></span>
           <span></span>
           <span></span>
         </button>
       </nav>
+      {mobileMenuOpen ? (
+        <div className="mobile-menu" aria-label="Mobile navigation">
+          <button
+            className={`hover:text-white transition ${activePage === 'home' ? 'text-white' : ''}`}
+            onClick={() => navigateTo('home')}
+          >
+            Home
+          </button>
+          <button
+            className={`hover:text-white transition ${activePage === 'about' ? 'text-white' : ''}`}
+            onClick={() => navigateTo('about')}
+          >
+            About
+          </button>
+          <button
+            className={`hover:text-white transition ${activePage === 'contact' ? 'text-white' : ''}`}
+            onClick={() => navigateTo('contact')}
+          >
+            Contact
+          </button>
+        </div>
+      ) : null}
 
       {activePage === 'about' ? (
         <main className="page-content" aria-label="About">
