@@ -50,6 +50,3 @@ RUN { \
     echo 'opcache.fast_shutdown=1'; \
     echo 'memory_limit=512M'; \
     } > /usr/local/etc/php/conf.d/drupal-recommended.ini
-
-# Install Drush 13 globally (optional, usually per project, but Task 1.2 asks for it)
-# We can also install it via composer in Task 1.2 step.
