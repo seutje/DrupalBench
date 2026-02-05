@@ -355,6 +355,7 @@ def main():
     parser.add_argument("--model", type=str)
     parser.add_argument("--provider", type=str)
     parser.add_argument("--task_id", type=str)
+    parser.add_argument("--resume", action="store_true", help="Resume from existing results.json")
     args = parser.parse_args()
     global MODEL_NAME, MODEL_PROVIDER
     if args.model: MODEL_NAME = args.model
@@ -367,9 +368,28 @@ def main():
         with open("synthetic_tasks.json", "r") as f: all_tasks.extend(json.load(f))
 
     results = {"model_name": MODEL_NAME, "model_provider": MODEL_PROVIDER, "tasks": [], "total_samples": 0, "total_correct": 0}
+    completed_task_ids = set()
+    if args.resume and os.path.exists("results.json"):
+        try:
+            with open("results.json", "r") as f:
+                existing = json.load(f)
+            if isinstance(existing, dict) and isinstance(existing.get("tasks"), list):
+                results["tasks"] = existing["tasks"]
+                # Recompute totals from existing tasks to keep consistency.
+                results["total_samples"] = sum(t.get("total_samples", 0) for t in results["tasks"])
+                results["total_correct"] = sum(t.get("correct_samples", 0) for t in results["tasks"])
+                completed_task_ids = {t.get("task_id") for t in results["tasks"] if t.get("task_id") is not None}
+                print(f"Resuming from results.json with {len(completed_task_ids)} completed tasks.")
+        except Exception as e:
+            print(f"Failed to read results.json for resume: {e}")
+    elif args.resume:
+        print("Resume requested but results.json not found. Starting fresh.")
     for task in all_tasks:
         if 'task_id' not in task: task['task_id'] = f"syn_{hashlib.md5(task.get('title', '').encode()).hexdigest()[:8]}"
         if args.task_id and str(task['task_id']) != args.task_id: continue
+        if args.resume and task.get("task_id") in completed_task_ids:
+            print(f"Skipping Task {task['task_id']} (already in results.json)")
+            continue
         task_res = evaluate_task(task, samples_per_task=args.samples)
         results["tasks"].append(task_res)
         results["total_samples"] += task_res["total_samples"]
