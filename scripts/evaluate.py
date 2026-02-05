@@ -27,6 +27,7 @@ MODEL_NAME = ENV.get("MODEL_NAME", "gemini-3-flash-preview")
 GEMINI_API_KEY = ENV.get("GEMINI_API_KEY")
 OLLAMA_HOST = ENV.get("OLLAMA_HOST", "http://localhost:11434")
 MODEL_REQUEST_TIMEOUT = 15 * 60  # Hard timeout for model calls (seconds).
+CONTAINER_NAME = "drupalbench_app"
 
 def run_command(command, shell=True, timeout=None):
     try:
@@ -36,6 +37,10 @@ def run_command(command, shell=True, timeout=None):
         return False, "", "Command timed out"
     except Exception as e:
         return False, "", str(e)
+
+def container_running():
+    success, stdout, _ = run_command(f"docker ps -q -f name={CONTAINER_NAME}")
+    return success and stdout.strip() != ""
 
 def call_model(prompt):
     system_instruction = """You are an expert Drupal 11 developer. 
@@ -170,33 +175,36 @@ def fix_hunk_headers(patch_text):
 
 def reset_environment():
     print("  Resetting environment...")
-    run_command("docker-compose exec -T drupal git config --global --add safe.directory /var/www/html")
-    run_command("docker-compose exec -T drupal git reset --hard HEAD")
-    run_command("docker-compose exec -T drupal git clean -fd -e vendor/ -e web/sites/default/settings.php -e web/sites/default/files/")
-    # Fix permissions for functional tests - only on sites directory for speed
-    run_command("docker-compose exec -T drupal mkdir -p web/sites/simpletest/browser_output")
-    run_command("docker-compose exec -T drupal chown -R www-data:www-data web/sites")
-    run_command("docker-compose exec -T drupal chmod -R 777 web/sites/simpletest")
+    if not container_running():
+        return
+    reset_cmd = (
+        "git config --global --add safe.directory /var/www/html && "
+        "git reset --hard HEAD && "
+        "git clean -fd -e vendor/ -e web/sites/default/settings.php -e web/sites/default/files/ && "
+        "mkdir -p web/sites/simpletest/browser_output && "
+        "chown -R www-data:www-data web/sites && "
+        "chmod -R 777 web/sites/simpletest"
+    )
+    run_command(f"docker exec -T {CONTAINER_NAME} bash -lc \"{reset_cmd}\"")
 
 def unsolve_task(task):
     if 'ground_truth' not in task or not isinstance(task['ground_truth'], str):
         return False
     patch = task['ground_truth']
     with open("unsolve.patch", "w") as f: f.write(patch)
-    success_id, container_id, _ = run_command("docker-compose ps -q drupal")
-    container_id = container_id.strip()
-    if not container_id: return False
-    run_command(f"docker cp unsolve.patch {container_id}:/var/www/html/unsolve.patch")
+    if not container_running():
+        return False
+    run_command(f"docker cp unsolve.patch {CONTAINER_NAME}:/var/www/html/unsolve.patch")
     unsolved = False
     for directory in ["web", "."]:
-        cmd = f"docker-compose exec -T drupal bash -c 'cd {directory} && git apply -R --recount /var/www/html/unsolve.patch'"
+        cmd = f"docker exec -T {CONTAINER_NAME} bash -lc 'cd {directory} && git apply -R --recount /var/www/html/unsolve.patch'"
         if run_command(cmd)[0]:
             print(f"    Task was already solved. Reversed patch in {directory} to 'unsolve' it.")
             unsolved = True
             break
     if unsolved:
-        run_command("docker-compose exec -T drupal git add .")
-        run_command("docker-compose exec -T drupal git commit -m 'Unsolve task' --allow-empty")
+        run_command(f"docker exec -T {CONTAINER_NAME} git add .")
+        run_command(f"docker exec -T {CONTAINER_NAME} git commit -m 'Unsolve task' --allow-empty")
     return unsolved
 
 def get_context_for_task(task):
@@ -230,23 +238,22 @@ def evaluate_task(task, samples_per_task=1):
     task_id = task['task_id']
     print(f"Evaluating Task {task_id}: {task['title']}")
     sample_results = []
-    
+    code_context = get_context_for_task(task)
+
     for i in range(samples_per_task):
         print(f"  Sample {i+1}/{samples_per_task}...")
         reset_environment()
         unsolved = unsolve_task(task)
         
-        code_context = get_context_for_task(task)
         full_prompt = task['prompt'] + code_context
         
         if 'test_path' in task and 'test_content' in task:
             test_path = task['test_path']
             if not test_path.startswith('web/'): test_path = f"web/{test_path}"
             with open("test_file.php", "w") as f: f.write(task['test_content'])
-            success_id, container_id, _ = run_command("docker-compose ps -q drupal")
-            if container_id.strip():
-                run_command(f"docker-compose exec -T drupal mkdir -p {os.path.dirname(test_path)}")
-                run_command(f"docker cp test_file.php {container_id.strip()}:/var/www/html/{test_path}")
+            if container_running():
+                run_command(f"docker exec -T {CONTAINER_NAME} mkdir -p {os.path.dirname(test_path)}")
+                run_command(f"docker cp test_file.php {CONTAINER_NAME}:/var/www/html/{test_path}")
                 print(f"    Created synthetic test at {test_path}")
         
         patch, error = call_model(full_prompt)
@@ -256,16 +263,16 @@ def evaluate_task(task, samples_per_task=1):
 
         patch = fix_hunk_headers(patch)
         with open("temp.patch", "w") as f: f.write(patch)
-        success_id, container_id, _ = run_command("docker-compose ps -q drupal")
-        if not container_id.strip(): continue
-        run_command(f"docker cp temp.patch {container_id.strip()}:/var/www/html/task.patch")
+        if not container_running():
+            continue
+        run_command(f"docker cp temp.patch {CONTAINER_NAME}:/var/www/html/task.patch")
         
         patch_applied = False
         # Try git apply first with various options
         for directory in ["web", "."]:
             for p_arg in ["-p1", "-p0"]:
                 for extra in ["", "--3way"]:
-                    cmd = f"docker-compose exec -T drupal git apply -v {extra} --recount --whitespace=fix {p_arg} --directory={directory} /var/www/html/task.patch"
+                    cmd = f"docker exec -T {CONTAINER_NAME} git apply -v {extra} --recount --whitespace=fix {p_arg} --directory={directory} /var/www/html/task.patch"
                     if run_command(cmd)[0]:
                         print(f"    Patch applied with git apply {extra} {p_arg} --directory={directory}")
                         patch_applied = True
@@ -277,7 +284,7 @@ def evaluate_task(task, samples_per_task=1):
             # Fallback to patch utility
             for directory in ["web", "."]:
                 for p_level in ["-p1", "-p0"]:
-                    cmd = f"docker-compose exec -T drupal patch {p_level} --fuzz=3 -l -t -N -d {directory} -i /var/www/html/task.patch"
+                    cmd = f"docker exec -T {CONTAINER_NAME} patch {p_level} --fuzz=3 -l -t -N -d {directory} -i /var/www/html/task.patch"
                     if run_command(cmd)[0]:
                         print(f"    Patch applied with patch {p_level} --fuzz in {directory}")
                         patch_applied = True
@@ -314,27 +321,31 @@ def evaluate_task(task, samples_per_task=1):
         if test_path_to_run:
             print(f"    Running tests in {test_path_to_run}...")
             paths = test_path_to_run.split()
-            all_passed = True
-            combined_output = ""
+            filtered_paths = []
             for p in paths:
                 rel_p = p.replace("web/", "")
-                # Skip FunctionalJavascript tests as they require WebDriver
                 if "FunctionalJavascript" in rel_p:
                     print(f"      Skipping Javascript test: {rel_p}")
                     continue
-                
-                print(f"      Running {rel_p}...")
-                # Increased timeout to 900s (15 mins) per test file
-                phpunit_cmd = f"docker-compose exec -T -u www-data drupal bash -c 'cd web && timeout 900 ../vendor/bin/phpunit -c core/phpunit.xml {rel_p}'"
-                success, stdout, stderr = run_command(phpunit_cmd, timeout=910)
-                combined_output += f"\n--- Output for {rel_p} ---\n{stdout}{stderr}"
-                
-                # Check for "OK" in output as a fallback for non-zero exit codes due to deprecations
+                filtered_paths.append(rel_p)
+
+            all_passed = True
+            combined_output = ""
+            if filtered_paths:
+                print(f"      Running {len(filtered_paths)} test path(s) in one PHPUnit invocation...")
+                timeout_seconds = 900 * max(1, len(filtered_paths))
+                phpunit_cmd = (
+                    f"docker exec -T -u www-data {CONTAINER_NAME} "
+                    f"bash -lc 'cd web && timeout {timeout_seconds} ../vendor/bin/phpunit -c core/phpunit.xml "
+                    f"{' '.join(filtered_paths)}'"
+                )
+                success, stdout, stderr = run_command(phpunit_cmd, timeout=timeout_seconds + 10)
+                combined_output += f"\n--- Output ---\n{stdout}{stderr}"
                 if not success and "OK (" not in stdout:
-                    print(f"      FAILED: {rel_p}")
+                    print("      FAILED")
                     all_passed = False
                 else:
-                    print(f"      PASSED: {rel_p}")
+                    print("      PASSED")
             
             sample_results.append({"passed": all_passed, "patch": patch, "phpunit_output": combined_output})
             print("    SUCCESS" if all_passed else "    FAILED (tests)")
