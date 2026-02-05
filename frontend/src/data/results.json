@@ -564,10 +564,10 @@
   {
     "model_name": "ministral-3:8b",
     "total_tasks": 46,
-    "total_samples": 46,
-    "total_correct": 3,
-    "pass_at_1": 0.06521739130434782,
-    "pass_at_5": 0.06521739130434782,
+    "total_samples": 460,
+    "total_correct": 23,
+    "pass_at_1": 0.049999999999999996,
+    "pass_at_5": 0.12318840579710146,
     "tasks": [
       {
         "task_id": "2381293",
@@ -585,7 +585,7 @@
         "task_id": "3505370",
         "title": "Remove 'filter tips' page and deprecate the long format API",
         "passed": false,
-        "quality_summary": "HTTPConnectionPool(host='127.0.0.1', port=11434): Read timed out. (read timeout=900)",
+        "quality_summary": "Patch application failed",
         "domain_results": {
           "backend": {
             "passed": false,
@@ -596,11 +596,11 @@
       {
         "task_id": "3114887",
         "title": "Error responses are stored when using the Download migration process",
-        "passed": false,
-        "quality_summary": "Patch application failed",
+        "passed": true,
+        "quality_summary": "Clean",
         "domain_results": {
           "backend": {
-            "passed": false,
+            "passed": true,
             "output": "No output available"
           }
         }
@@ -608,11 +608,11 @@
       {
         "task_id": "2486267",
         "title": "Attributes of a block content are applied to block itself",
-        "passed": false,
-        "quality_summary": "Patch application failed",
+        "passed": true,
+        "quality_summary": "Clean",
         "domain_results": {
           "backend": {
-            "passed": false,
+            "passed": true,
             "output": "No output available"
           }
         }
@@ -633,7 +633,7 @@
         "task_id": "3560357",
         "title": "Taxonomy term ID from URL ViewsArgumentDefault plugin does not apply node cache tags when \"Load filter from node page\" is selected",
         "passed": false,
-        "quality_summary": "Patch application failed",
+        "quality_summary": "HTTPConnectionPool(host='127.0.0.1', port=11434): Read timed out. (read timeout=900)",
         "domain_results": {
           "backend": {
             "passed": false,
@@ -661,7 +661,7 @@
         "domain_results": {
           "backend": {
             "passed": true,
-            "output": "\n--- Output for core/modules/block/tests/src/Functional/BlockTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n..............                                                    14 / 14 (100%)\n\nHTML output was generated.\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockTest-1-65586488.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockTest-2-65586488.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockTest-3-65586488.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockTest-4-65586488.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockTest-5-65586488.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockTest-6-65586488.html\nhttp://localhost/sites/simpletest/browser_output/Drup"
+            "output": "\n--- Output for core/modules/block/tests/src/Functional/BlockTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n..............                                                    14 / 14 (100%)\n\nHTML output was generated.\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockTest-1-28297567.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockTest-2-28297567.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockTest-3-28297567.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockTest-4-28297567.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockTest-5-28297567.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockTest-6-28297567.html\nhttp://localhost/sites/simpletest/browser_output/Drup"
           }
         }
       },
@@ -705,11 +705,11 @@
         "task_id": "3441503",
         "title": "Add validation constraints to system.theme",
         "passed": false,
-        "quality_summary": "Patch application failed",
+        "quality_summary": "Test Failures",
         "domain_results": {
           "backend": {
             "passed": false,
-            "output": "No output available"
+            "output": "\n--- Output for core/modules/system/tests/src/Functional/Update/ThemeAdminUpdateTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nTest file \"core/modules/system/tests/src/Functional/Update/ThemeAdminUpdateTest.php\" not found\n\n--- Output for core/modules/views/tests/src/Functional/Plugin/DisplayPageWebTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\nEEEEE                                                               5 / 5 (100%)\n\nTime: 00:05.776, Memory: 12.00 MB\n\nThere were 5 errors:\n\n1) Drupal\\Tests\\views\\Functional\\Plugin\\DisplayPageWebTest::testArguments\nTypeError: Drupal\\Core\\Config\\Schema\\Mapping::getDefinedKeys(): Return value must be of type array, null returned\n\n/var/www/html/web/core/lib/Drupal/Core/Config/Schema/Mapping.php:90\n/var/www/html/web/core/lib/Drupal/Core/Config/Schema/Mapping.php:62\n/var/www/html/web/core/lib/Drupal/Core/Validation/Plugin/Validation"
           }
         }
       },
@@ -721,19 +721,19 @@
         "domain_results": {
           "backend": {
             "passed": true,
-            "output": "\n--- Output for core/modules/migrate_drupal/tests/src/Unit/source/DrupalSqlBaseTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n........                                                            8 / 8 (100%)\n\nTime: 00:00.035, Memory: 14.00 MB\n\nOK (8 tests, 17 assertions)\n\n--- Output for core/modules/image/tests/src/Unit/ImageStyleTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n....                                                                4 / 4 (100%)\n\nTime: 00:00.042, Memory: 14.00 MB\n\nOK (4 tests, 18 assertions)\n\n--- Output for core/modules/locale/tests/src/Unit/LocaleTranslationTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n.                                                             "
+            "output": "No output available"
           }
         }
       },
       {
         "task_id": "2954725",
         "title": "AccountInterface::getLastAccessedTime() implementors return incorrect data type",
-        "passed": false,
-        "quality_summary": "Patch application failed",
+        "passed": true,
+        "quality_summary": "Clean",
         "domain_results": {
           "backend": {
-            "passed": false,
-            "output": "No output available"
+            "passed": true,
+            "output": "\n--- Output for core/modules/user/tests/src/Kernel/Migrate/d6/MigrateUserTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\nE                                                                   1 / 1 (100%)\n\nTime: 00:00.660, Memory: 10.00 MB\n\nThere was 1 error:\n\n1) Drupal\\Tests\\user\\Kernel\\Migrate\\d6\\MigrateUserTest::testUser\nError: Call to undefined method Drupal\\Core\\Field\\BaseFieldDefinition::setType()\n\n/var/www/html/web/core/modules/user/src/Entity/User.php:566\n/var/www/html/web/core/lib/Drupal/Core/Entity/EntityFieldManager.php:242\n/var/www/html/web/core/lib/Drupal/Core/Entity/EntityFieldManager.php:204\n/var/www/html/web/core/lib/Drupal/Core/Field/Plugin/Field/FieldType/EntityReferenceItem.php:80\n/var/www/html/web/core/lib/Drupal/Core/Field/Plugin/Field/FieldType/EntityReferenceItem.php:177\n/var/www/html/web/core/lib/Drupal/Core/Field/BaseFieldDefinition.php:672\n/var/www/html/web/core/lib"
           }
         }
       },
@@ -777,11 +777,11 @@
         "task_id": "3569778",
         "title": "Fix link in \\Drupal\\Tests\\package_manager\\Kernel\\TestSandboxManager::__sleep doc",
         "passed": false,
-        "quality_summary": "Patch application failed",
+        "quality_summary": "Test Failures",
         "domain_results": {
           "backend": {
             "passed": false,
-            "output": "No output available"
+            "output": "\n--- Output for core/modules/package_manager ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\nEEEE...FFFFFFEFFFFFF.......................FFFFFFFFFFEFFFFEEEEE  63 / 497 ( 12%)\nEEEEEEEFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFF.FF.FF..FFFFFFFF..EFFFF 126 / 497 ( 25%)\nFFFFFFFFFFFFFFFFFEEEEEEEEEEEEFFFFFFFF......FFFFFFF.EEEEE..FFFFF 189 / 497 ( 38%)\nFEEFFFFFFFFFFFEEEEEEFFFFFFFEEEEEEEEEEEEFSFEFFFFFFFEFFFFFFFFF... 252 / 497 ( 50%)\n..................FFEE.EEEEEEEEEEFFFEFFEEE.FFFFEEEEEEEEEEEEEEEF 315 / 497 ( 63%)\nFF.EFFFFFFFEEEEEEEEEEEEEEFFFFFFFFFFFFFFFFEFFS.FFFFFFFFFFFFFFFFF 378 / 497 ( 76%)\nFF............................................................. 441 / 497 ( 88%)\n........................................................        497 / 497 (100%)\n\nHTML output was generated.\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_package_manager_Functional_ComposerRequirementTest-1-43124922.html\nhttp://local"
           }
         }
       },
@@ -812,11 +812,11 @@
       {
         "task_id": "3568387",
         "title": "Deprecate text_summary and move to Help Class",
-        "passed": false,
-        "quality_summary": "HTTPConnectionPool(host='127.0.0.1', port=11434): Read timed out. (read timeout=900)",
+        "passed": true,
+        "quality_summary": "Clean",
         "domain_results": {
           "backend": {
-            "passed": false,
+            "passed": true,
             "output": "No output available"
           }
         }
@@ -829,7 +829,7 @@
         "domain_results": {
           "backend": {
             "passed": true,
-            "output": "\n--- Output for core/modules/package_manager/tests/src/Unit/LoggingStagerTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n.                                                                   1 / 1 (100%)\n\nTime: 00:00.013, Memory: 12.00 MB\n\nOK (1 test, 8 assertions)\n\n--- Output for core/modules/package_manager/tests/src/Unit/LoggingCommitterTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n.                                                                   1 / 1 (100%)\n\nTime: 00:00.012, Memory: 12.00 MB\n\nOK (1 test, 7 assertions)\n\n--- Output for core/modules/package_manager/tests/src/Unit/EventWithPackageListTraitTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n..                                     "
+            "output": "\n--- Output for core/modules/package_manager/tests/src/Unit/LoggingCommitterTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\nF                                                                   1 / 1 (100%)\n\nTime: 00:00.016, Memory: 12.00 MB\n\nThere was 1 failure:\n\n1) Drupal\\Tests\\package_manager\\Unit\\LoggingCommitterTest::testDecoratedCommitterIsCalled\nExpectation failed for method name is \"commit\" when invoked 1 time\nParameter 0 for invocation PhpTuf\\ComposerStager\\API\\Core\\CommitterInterface::commit(MockObject_PathInterface_e2e62dd9 Object (...), MockObject_PathInterface_e2e62dd9 Object (...), null, Drupal\\package_manager\\FileProcessOutputCallback Object (...), 120): void does not match expected value.\nMockObject_PathInterface_e2e62dd9 Object #564 (\n    '__phpunit_state' => PHPUnit\\Framework\\MockObject\\TestDoubleState Object #640 (\n        'configurableMethods' => Array &0 [\n            0"
           }
         }
       },
@@ -885,11 +885,11 @@
         "task_id": "3565886",
         "title": "Navigation module throws an error on missing URL",
         "passed": false,
-        "quality_summary": "Patch application failed",
+        "quality_summary": "Test Failures",
         "domain_results": {
           "backend": {
             "passed": false,
-            "output": "No output available"
+            "output": "\n--- Output for core/modules/navigation/tests/src/Kernel/NavigationEntityRouteHelperTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nTest file \"core/modules/navigation/tests/src/Kernel/NavigationEntityRouteHelperTest.php\" not found\n"
           }
         }
       },
@@ -981,11 +981,11 @@
         "task_id": "3554447",
         "title": "Use #attributes instead of #item_attributes",
         "passed": false,
-        "quality_summary": "Test Failures",
+        "quality_summary": "HTTPConnectionPool(host='127.0.0.1', port=11434): Read timed out. (read timeout=900)",
         "domain_results": {
           "backend": {
             "passed": false,
-            "output": "\n--- Output for core/modules/image/tests/src/Kernel/ImageThemeFunctionTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\nW..                                                                 3 / 3 (100%)\n\nTime: 00:07.113, Memory: 12.00 MB\n\n1 test triggered 1 PHP warning:\n\n1) /var/www/html/web/core/modules/image/src/Hook/ImageThemeHooks.php:165\nUndefined array key \"item_attributes\"\n\nTriggered by:\n\n* Drupal\\Tests\\image\\Kernel\\ImageThemeFunctionTest::testImageFormatterTheme (3 times)\n  /var/www/html/web/core/modules/image/tests/src/Kernel/ImageThemeFunctionTest.php:90\n\nOK, but there were issues!\nTests: 3, Assertions: 31, Warnings: 1.\n\n--- Output for core/modules/responsive_image/tests/src/Functional/ResponsiveImageFieldDisplayTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\nEEE..EEE                  "
+            "output": "No output available"
           }
         }
       },
@@ -1041,7 +1041,7 @@
         "task_id": "syn_c5dc7fac",
         "title": "Implement time-based garbage collection for asset aggregates",
         "passed": false,
-        "quality_summary": "HTTPConnectionPool(host='127.0.0.1', port=11434): Read timed out. (read timeout=900)",
+        "quality_summary": "Patch application failed",
         "domain_results": {
           "backend": {
             "passed": false,
@@ -1065,7 +1065,7 @@
         "task_id": "syn_905bee07",
         "title": "Update Product Review Recipe to align with Drupal 11 text field standards",
         "passed": false,
-        "quality_summary": "HTTPConnectionPool(host='127.0.0.1', port=11434): Read timed out. (read timeout=900)",
+        "quality_summary": "Patch application failed",
         "domain_results": {
           "backend": {
             "passed": false,
