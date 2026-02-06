@@ -171,6 +171,7 @@
 }
 
 .glass-card {
+  position: relative;
   background: rgba(15, 23, 42, 0.55);
   border: 1px solid rgba(148, 163, 184, 0.2);
   border-radius: 20px;
@@ -179,6 +180,21 @@
   backdrop-filter: blur(14px);
   transition: border 0.3s ease, transform 0.3s ease;
   cursor: pointer;
+}
+
+.sample-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.32);
+  background: rgba(15, 23, 42, 0.82);
+  color: rgba(226, 232, 240, 0.95);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1;
 }
 
 .glass-card:hover {

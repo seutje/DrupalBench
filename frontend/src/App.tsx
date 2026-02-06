@@ -314,7 +314,8 @@ function App() {
                   className="glass-card"
                   onClick={() => openModelDetails(model)}
                 >
-                  <h3 className="text-lg md:text-xl font-semibold mb-6 text-white/90">
+                  <span className="sample-badge">{model.total_samples} samples</span>
+                  <h3 className="text-lg md:text-xl font-semibold mb-6 text-white/90 pr-28">
                     {model.model_name}
                   </h3>
                   <div className="space-y-5">
