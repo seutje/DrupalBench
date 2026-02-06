@@ -112,10 +112,14 @@ function App() {
         
         <header className="mb-8">
           <h1 className="text-4xl font-bold mb-2">{selectedModel.model_name}</h1>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mt-4">
             <div className="bg-gray-800 p-4 rounded">
               <div className="text-sm text-gray-400">Total Tasks</div>
               <div className="text-2xl font-semibold">{selectedModel.total_tasks}</div>
+            </div>
+            <div className="bg-gray-800 p-4 rounded">
+              <div className="text-sm text-gray-400">Samples</div>
+              <div className="text-2xl font-semibold">{selectedModel.total_samples}</div>
             </div>
             <div className="bg-gray-800 p-4 rounded">
               <div className="text-sm text-gray-400">Total Correct</div>
