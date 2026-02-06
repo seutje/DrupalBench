@@ -1,5 +1,567 @@
 [
   {
+    "model_name": "qwen2.5-coder:3b",
+    "total_tasks": 46,
+    "total_samples": 460,
+    "total_correct": 0,
+    "pass_at_1": 0.0,
+    "pass_at_5": 0.0,
+    "tasks": [
+      {
+        "task_id": "2381293",
+        "title": "Actions reordering on views bulk forms",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3505370",
+        "title": "Remove 'filter tips' page and deprecate the long format API",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3114887",
+        "title": "Error responses are stored when using the Download migration process",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "2486267",
+        "title": "Attributes of a block content are applied to block itself",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3057267",
+        "title": "Stop automatically logging out users during maintenance mode",
+        "passed": false,
+        "quality_summary": "HTTPConnectionPool(host='127.0.0.1', port=11434): Read timed out. (read timeout=900)",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3560357",
+        "title": "Taxonomy term ID from URL ViewsArgumentDefault plugin does not apply node cache tags when \"Load filter from node page\" is selected",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3544395",
+        "title": "Current user missing from language negotiator outside of request context",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3561564",
+        "title": "Support the same block being used for page title & main content",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "2229617",
+        "title": "Change form element access bypass default to FALSE on programmatic submissions.",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3478097",
+        "title": "MySQL no longer recommended and remove Percona",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3325551",
+        "title": "Add \"Disable image resize\" setting to image fields",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3441503",
+        "title": "Add validation constraints to system.theme",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3558167",
+        "title": "Fix \"expects FooInterface, MockObject given\" phpstan errors",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "2954725",
+        "title": "AccountInterface::getLastAccessedTime() implementors return incorrect data type",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3552759",
+        "title": "Fix more incorrect phpdoc type hints (part 1)",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3513035",
+        "title": "New NoEntitiesExistYetWithHigherCardinality constraint",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3538681",
+        "title": "Add support for selecting the dropbutton_type with the Views dropbutton field",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3569778",
+        "title": "Fix link in \\Drupal\\Tests\\package_manager\\Kernel\\TestSandboxManager::__sleep doc",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "2536594",
+        "title": "Add a FilterFormatRepository providing methods to load filter formats",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3555670",
+        "title": "Deprecate user_load_by_mail & user_load_by_name",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3568387",
+        "title": "Deprecate text_summary and move to Help Class",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3569426",
+        "title": "Convert expectation-less test mocks to stubs - Package Manager module",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3568922",
+        "title": "Method discoverResourceUrl does not check response type",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3469843",
+        "title": "Fix getExpectedUnauthorizedEntityAccessCacheability PHPStan-0 issues",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3568124",
+        "title": "Deprecate remaining functions in media.module",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3567544",
+        "title": "Alias lookup by path is not case sensitive but AliasPrefixList and AliasRepository::preloadPathAlias's return value is leading to inconsistencies",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3565886",
+        "title": "Navigation module throws an error on missing URL",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3567137",
+        "title": "Add test coverage for duplicate node titles on content_moderation latest version page",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3566424",
+        "title": "Deprecate Views::pluginManager() and Views::handlerManager() and replace with service locator",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "2655794",
+        "title": "Remove redundant WAI-ARIA role attributes from <main>, <nav>, <aside>, <header>, and <footer> elements",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3453210",
+        "title": "getCreatedTime returns string instead of integer",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "2954834",
+        "title": "Add poster image to HTML5 media videos",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3565218",
+        "title": "[random test failure] ResponsiveImageFieldUiTest::testResponsiveImageFormatterUi()",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3472008",
+        "title": "Avoid JSON:API schema validation by default when assert is enabled",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3554447",
+        "title": "Use #attributes instead of #item_attributes",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "1522154",
+        "title": "Saving non-default revisions shouldn't trigger a search reindex",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3505182",
+        "title": "An entity without a label causes an uncaught exception for the navigation:title component",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "syn_48456852",
+        "title": "Refactor NewsCardBlock to use ContextualLinksSerializer for SDC contextual links",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "syn_ab05d34e",
+        "title": "Implement static menu link overrides in a Drupal Recipe",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "syn_c5dc7fac",
+        "title": "Implement time-based garbage collection for asset aggregates",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "syn_66837d23",
+        "title": "Fix deprecated #access values in SDC component render arrays",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "syn_905bee07",
+        "title": "Update Product Review Recipe to align with Drupal 11 text field standards",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "syn_da8a24cb",
+        "title": "Refactor Comment anonymous contact settings to use AnonymousContact enum and PHPUnit 10",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "syn_1848a69a",
+        "title": "Modernize Comment Preview Logic and Migration to PHPUnit 10",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "syn_3afdde77",
+        "title": "Migrate deprecated History module permissions to Access Policy API",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "syn_d7552fe8",
+        "title": "Implement getSummary() for custom FieldTypeCategoryInterface implementations",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      }
+    ]
+  },
+  {
     "model_name": "qwen2.5-coder:7b",
     "total_tasks": 46,
     "total_samples": 460,
