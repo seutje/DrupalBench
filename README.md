@@ -33,6 +33,10 @@ DrupalBench is a Drupal 11–focused LLM benchmark. It mines real Drupal issues,
 MODEL_PROVIDER=gemini
 MODEL_NAME=gemini-3-flash-preview
 GEMINI_API_KEY=your_api_key_here
+# or for OpenAI
+# MODEL_PROVIDER=openai
+# MODEL_NAME=gpt-4.1-mini
+# OPENAI_API_KEY=your_api_key_here
 # or for local Ollama
 # MODEL_PROVIDER=ollama
 # MODEL_NAME=llama3.1

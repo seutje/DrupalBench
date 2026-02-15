@@ -25,6 +25,7 @@ ENV = load_env()
 MODEL_PROVIDER = ENV.get("MODEL_PROVIDER", "gemini")
 MODEL_NAME = ENV.get("MODEL_NAME", "gemini-3-flash-preview")
 GEMINI_API_KEY = ENV.get("GEMINI_API_KEY")
+OPENAI_API_KEY = ENV.get("OPENAI_API_KEY")
 OLLAMA_HOST = ENV.get("OLLAMA_HOST", "http://localhost:11434")
 MODEL_REQUEST_TIMEOUT = 15 * 60  # Hard timeout for model calls (seconds).
 
@@ -48,6 +49,8 @@ Focus on making the patch compatible with the current file contents provided in 
     
     if MODEL_PROVIDER == "gemini":
         return call_gemini(prompt, system_instruction)
+    elif MODEL_PROVIDER == "openai":
+        return call_openai(prompt, system_instruction)
     elif MODEL_PROVIDER == "ollama":
         return call_ollama(prompt, system_instruction)
     else:
@@ -85,6 +88,33 @@ def call_ollama(prompt, system_instruction):
         result = response.json()
         text = result.get('response', '')
         return clean_patch_output(text), None
+    except Exception as e:
+        return None, str(e)
+
+def call_openai(prompt, system_instruction):
+    if not OPENAI_API_KEY:
+        return None, "OPENAI_API_KEY not found."
+
+    url = "https://api.openai.com/v1/responses"
+    full_prompt = f"{system_instruction}\n\nProblem Description:\n{prompt}"
+    payload = {
+        "model": MODEL_NAME,
+        "input": full_prompt,
+    }
+    headers = {
+        "Authorization": f"Bearer {OPENAI_API_KEY}",
+        "Content-Type": "application/json",
+    }
+
+    try:
+        response = requests.post(url, json=payload, headers=headers, timeout=MODEL_REQUEST_TIMEOUT)
+        if response.status_code != 200:
+            return None, f"OpenAI Error {response.status_code}: {response.text}"
+        result = response.json()
+        text = result.get("output_text", "")
+        if text:
+            return clean_patch_output(text), None
+        return None, "No output_text in response."
     except Exception as e:
         return None, str(e)
 

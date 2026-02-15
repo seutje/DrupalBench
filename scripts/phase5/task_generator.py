@@ -23,7 +23,9 @@ ENV = load_env()
 MODEL_PROVIDER = ENV.get("MODEL_PROVIDER", "gemini")
 MODEL_NAME = ENV.get("MODEL_NAME", "gemini-3-flash-preview")
 GEMINI_API_KEY = ENV.get("GEMINI_API_KEY")
+OPENAI_API_KEY = ENV.get("OPENAI_API_KEY")
 OLLAMA_HOST = ENV.get("OLLAMA_HOST", "http://localhost:11434")
+MODEL_REQUEST_TIMEOUT = 15 * 60
 
 def scrape_change_records(limit=5):
     url = "https://www.drupal.org/list-changes/drupal"
@@ -86,6 +88,8 @@ def generate_task(change_record):
     
     if MODEL_PROVIDER == "gemini":
         task = generate_task_gemini(prompt)
+    elif MODEL_PROVIDER == "openai":
+        task = generate_task_openai(prompt)
     elif MODEL_PROVIDER == "ollama":
         task = generate_task_ollama(prompt)
     else:
@@ -153,6 +157,49 @@ def generate_task_ollama(prompt):
         print(f"  Error: {e}")
         return None
 
+def generate_task_openai(prompt):
+    if not OPENAI_API_KEY:
+        print("Error: OPENAI_API_KEY not found.")
+        return None
+
+    url = "https://api.openai.com/v1/responses"
+    payload = {
+        "model": MODEL_NAME,
+        "input": prompt,
+        "text": {
+            "format": {
+                "type": "json_object"
+            }
+        }
+    }
+    headers = {
+        "Authorization": f"Bearer {OPENAI_API_KEY}",
+        "Content-Type": "application/json",
+    }
+
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            response = requests.post(url, json=payload, headers=headers, timeout=MODEL_REQUEST_TIMEOUT)
+            if response.status_code == 429:
+                wait_time = (attempt + 1) * 5
+                time.sleep(wait_time)
+                continue
+            if response.status_code != 200:
+                print(f"  OpenAI Error {response.status_code}: {response.text}")
+                return None
+
+            result = response.json()
+            content_text = result.get("output_text", "")
+            if content_text:
+                return json.loads(content_text)
+            print("  Error: OpenAI response did not include output_text")
+            return None
+        except Exception as e:
+            print(f"  Error: {e}")
+            time.sleep(2)
+    return None
+
 def main():
     parser = argparse.ArgumentParser(description="Generate synthetic Drupal 11 tasks.")
     parser.add_argument("--limit", type=int, default=5, help="Number of change records to process.")
@@ -163,6 +210,9 @@ def main():
     
     if MODEL_PROVIDER == "gemini" and not GEMINI_API_KEY:
         print("Error: GEMINI_API_KEY not found in .env")
+        sys.exit(1)
+    if MODEL_PROVIDER == "openai" and not OPENAI_API_KEY:
+        print("Error: OPENAI_API_KEY not found in .env")
         sys.exit(1)
 
     print("Scraping Drupal 11 Change Records...")
