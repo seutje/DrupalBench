@@ -27,6 +27,20 @@ else
     docker-compose exec -T drupal bash -c "composer require drush/drush:^13 drupal/core-dev:^11 phpstan/phpstan mglaman/phpstan-drupal drupal/coder --dev -W --no-interaction"
 fi
 
+echo "Resetting Drupal database tables..."
+docker-compose exec -T drupal mariadb --skip-ssl -udrupal -pdrupal -h db drupal <<'SQL'
+SET SESSION group_concat_max_len = 1000000;
+SET FOREIGN_KEY_CHECKS = 0;
+SELECT GROUP_CONCAT(CONCAT('`', table_name, '`')) INTO @tables
+FROM information_schema.tables
+WHERE table_schema = DATABASE();
+SET @drop_stmt = IF(@tables IS NULL, 'SELECT 1', CONCAT('DROP TABLE ', @tables));
+PREPARE stmt FROM @drop_stmt;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+SET FOREIGN_KEY_CHECKS = 1;
+SQL
+
 echo "Installing Drupal site..."
 docker-compose exec -T drupal ./vendor/bin/drush site:install \
   --db-url=mysql://drupal:drupal@db/drupal \
@@ -48,8 +62,7 @@ echo "Initializing git repository for benchmarking..."
 docker-compose exec -T drupal git init
 docker-compose exec -T drupal git config user.email "bench@example.com"
 docker-compose exec -T drupal git config user.name "DrupalBench"
-docker-compose exec -T drupal git add .
-docker-compose exec -T drupal git commit -m "Initial Drupal 11 installation"
+docker-compose exec -T drupal bash -c "git add . && if ! git diff --cached --quiet; then git commit -m 'Initial Drupal 11 installation'; else echo 'No changes to commit.'; fi"
 
 echo "Running Health Check..."
 docker-compose exec -T drupal php /var/www/html/health-check.php
