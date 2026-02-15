@@ -28,6 +28,10 @@ GEMINI_API_KEY = ENV.get("GEMINI_API_KEY")
 OPENAI_API_KEY = ENV.get("OPENAI_API_KEY")
 OLLAMA_HOST = ENV.get("OLLAMA_HOST", "http://localhost:11434")
 MODEL_REQUEST_TIMEOUT = 15 * 60  # Hard timeout for model calls (seconds).
+CONTEXT_WINDOW_LINES = int(ENV.get("CONTEXT_WINDOW_LINES", "60"))
+MAX_CONTEXT_CHARS = int(ENV.get("MAX_CONTEXT_CHARS", "120000"))
+MAX_CONTEXT_FILES = int(ENV.get("MAX_CONTEXT_FILES", "12"))
+CONTEXT_DEBUG = ENV.get("CONTEXT_DEBUG", "").strip().lower() in {"1", "true", "yes", "on"}
 
 def run_command(command, shell=True, timeout=None):
     try:
@@ -229,34 +233,242 @@ def unsolve_task(task):
         run_command("docker-compose exec -T drupal git commit -m 'Unsolve task' --allow-empty")
     return unsolved
 
-def get_context_for_task(task):
-    files_to_read = []
-    if 'ground_truth' in task and isinstance(task['ground_truth'], str):
-        files_to_read = re.findall(r'--- a/(.*)', task['ground_truth'])
-        files_to_read += re.findall(r'\+\+\+ b/(.*)', task['ground_truth'])
-        files_to_read += re.findall(r'--- (.*)', task['ground_truth'])
-        files_to_read += re.findall(r'\+\+\+ (.*)', task['ground_truth'])
-    seen = set()
-    context = "\n\nRelevant code context:\n"
-    found_any = False
-    for f_path in files_to_read:
-        f_path = f_path.strip().split('\t')[0]
-        if not f_path or f_path == '/dev/null' or f_path in seen: continue
-        seen.add(f_path)
-        content = ""
-        for prefix in ["web/", ""]:
-            full_path = f"app/{prefix}{f_path}"
-            if os.path.exists(full_path) and os.path.isfile(full_path):
-                try:
-                    with open(full_path, "r") as f: content = f.read()
-                    break
-                except: pass
-        if content:
-            context += f"\nFile: {f_path}\n```\n{content}\n```\n"
-            found_any = True
-    return context if found_any else ""
+def normalize_diff_path(path):
+    if not path:
+        return None
+    cleaned = path.strip().split('\t')[0].split(' ')[0].strip()
+    if cleaned.startswith("a/") or cleaned.startswith("b/"):
+        cleaned = cleaned[2:]
+    if cleaned == "/dev/null":
+        return None
+    return cleaned or None
 
-def evaluate_task(task, samples_per_task=1):
+def classify_file_priority(path):
+    lower = path.lower()
+    if "/tests/" in lower or lower.endswith("test.php"):
+        return 2
+    if lower.endswith(".php") or lower.endswith(".module") or lower.endswith(".inc") or \
+       lower.endswith(".install") or lower.endswith(".theme"):
+        return 0
+    if lower.endswith(".md") or lower.endswith(".txt") or lower.endswith(".rst"):
+        return 3
+    return 1
+
+def merge_ranges(ranges):
+    if not ranges:
+        return []
+    ranges = sorted(ranges)
+    merged = [ranges[0]]
+    for start, end in ranges[1:]:
+        prev_start, prev_end = merged[-1]
+        if start <= prev_end + 1:
+            merged[-1] = (prev_start, max(prev_end, end))
+        else:
+            merged.append((start, end))
+    return merged
+
+def get_file_targets_from_patch(patch_text):
+    targets = {}
+    order = []
+    old_path = None
+    current_path = None
+
+    if not patch_text:
+        return targets, order
+
+    for line in patch_text.splitlines():
+        if line.startswith("diff --git "):
+            old_path = None
+            current_path = None
+            continue
+        if line.startswith("--- "):
+            old_path = normalize_diff_path(line[4:])
+            continue
+        if line.startswith("+++ "):
+            new_path = normalize_diff_path(line[4:])
+            current_path = new_path or old_path
+            if current_path and current_path not in targets:
+                targets[current_path] = []
+                order.append(current_path)
+            continue
+        if line.startswith("@@") and current_path:
+            match = re.match(r'^@@ -(\d+),?(\d*) \+(\d+),?(\d*) @@', line)
+            if not match:
+                continue
+            old_start, old_len, new_start, new_len = match.groups()
+            old_start = int(old_start)
+            new_start = int(new_start)
+            old_len = int(old_len) if old_len else 1
+            new_len = int(new_len) if new_len else 1
+
+            start = old_start if old_start > 0 else new_start
+            span = old_len if old_len > 0 else new_len
+            if span <= 0:
+                span = 1
+            end = start + span - 1
+            targets[current_path].append((start, end))
+
+    return targets, order
+
+def resolve_context_path(f_path):
+    for prefix in ["web/", ""]:
+        full_path = f"app/{prefix}{f_path}"
+        if os.path.exists(full_path) and os.path.isfile(full_path):
+            return full_path
+    return None
+
+def build_snippet_for_range(lines, start, end, base_window, max_chars):
+    if not lines:
+        return None
+
+    start = max(1, start)
+    end = max(start, end)
+    max_chars = max(300, max_chars)
+    adaptive_window = max(5, base_window)
+    total_lines = len(lines)
+
+    while adaptive_window >= 5:
+        window_start = max(1, start - adaptive_window)
+        window_end = min(total_lines, end + adaptive_window)
+        snippet = "\n".join(lines[window_start - 1:window_end])
+        if len(snippet) <= max_chars:
+            return window_start, window_end, snippet, False
+        adaptive_window //= 2
+
+    window_start = max(1, start - 2)
+    window_end = min(total_lines, end + 2)
+    snippet = "\n".join(lines[window_start - 1:window_end])
+    truncated = False
+    if len(snippet) > max_chars:
+        snippet = snippet[:max_chars].rstrip() + "\n... [truncated]"
+        truncated = True
+    return window_start, window_end, snippet, truncated
+
+def estimate_tokens(text):
+    # Rough estimate across prose + code. Exact counting depends on model tokenizer.
+    if not text:
+        return 0
+    return (len(text) + 3) // 4
+
+def get_context_for_task(task, include_stats=False):
+    ground_truth = task.get("ground_truth")
+    default_stats = {
+        "candidate_files": 0,
+        "files_included": 0,
+        "files_missing": 0,
+        "files_skipped_budget": 0,
+        "file_limit_reached": False,
+        "snippets_included": 0,
+        "snippets_truncated": 0,
+        "context_chars": 0,
+        "context_tokens_estimate": 0,
+        "max_context_chars": MAX_CONTEXT_CHARS,
+        "max_context_files": MAX_CONTEXT_FILES,
+        "context_window_lines": CONTEXT_WINDOW_LINES,
+    }
+    if not isinstance(ground_truth, str) or not ground_truth.strip():
+        return ("", default_stats) if include_stats else ""
+
+    file_targets, file_order = get_file_targets_from_patch(ground_truth)
+    if not file_targets:
+        return ("", default_stats) if include_stats else ""
+
+    prioritized_files = []
+    for index, f_path in enumerate(file_order):
+        ranges = merge_ranges(file_targets.get(f_path, []))
+        touched_lines = sum((end - start + 1) for start, end in ranges)
+        prioritized_files.append((classify_file_priority(f_path), -touched_lines, index, f_path, ranges))
+    prioritized_files.sort()
+
+    context = "\n\nRelevant code context:\n"
+    total_chars = len(context)
+    files_included = 0
+    files_missing = 0
+    files_skipped_budget = 0
+    snippets_included = 0
+    snippets_truncated = 0
+
+    for _, _, _, f_path, ranges in prioritized_files:
+        if files_included >= MAX_CONTEXT_FILES or total_chars >= MAX_CONTEXT_CHARS:
+            files_skipped_budget += 1
+            break
+
+        full_path = resolve_context_path(f_path)
+        if not full_path:
+            files_missing += 1
+            continue
+        try:
+            with open(full_path, "r", errors="ignore") as f:
+                file_lines = f.read().splitlines()
+        except Exception:
+            files_missing += 1
+            continue
+        if not file_lines:
+            files_missing += 1
+            continue
+
+        if not ranges:
+            ranges = [(1, min(len(file_lines), 1))]
+
+        file_sections = []
+        remaining_chars = MAX_CONTEXT_CHARS - total_chars
+        if remaining_chars <= 0:
+            break
+
+        for i, (start, end) in enumerate(ranges, start=1):
+            if remaining_chars <= 0:
+                break
+            snippet_result = build_snippet_for_range(
+                file_lines,
+                start,
+                end,
+                CONTEXT_WINDOW_LINES,
+                remaining_chars
+            )
+            if not snippet_result:
+                continue
+            snippet_start, snippet_end, snippet, truncated = snippet_result
+            label = f"\nSnippet {i} (lines {snippet_start}-{snippet_end}{', truncated' if truncated else ''}):\n"
+            section = f"{label}```\n{snippet}\n```\n"
+            if len(section) > remaining_chars:
+                break
+            file_sections.append(section)
+            snippets_included += 1
+            if truncated:
+                snippets_truncated += 1
+            remaining_chars -= len(section)
+
+        if not file_sections:
+            files_skipped_budget += 1
+            continue
+
+        file_block = f"\nFile: {f_path}\n" + "".join(file_sections)
+        if total_chars + len(file_block) > MAX_CONTEXT_CHARS:
+            files_skipped_budget += 1
+            continue
+
+        context += file_block
+        total_chars += len(file_block)
+        files_included += 1
+
+    context_out = context if files_included else ""
+    stats = {
+        "candidate_files": len(prioritized_files),
+        "files_included": files_included,
+        "files_missing": files_missing,
+        "files_skipped_budget": files_skipped_budget,
+        "file_limit_reached": files_included >= MAX_CONTEXT_FILES,
+        "snippets_included": snippets_included,
+        "snippets_truncated": snippets_truncated,
+        "context_chars": len(context_out),
+        "context_tokens_estimate": estimate_tokens(context_out),
+        "max_context_chars": MAX_CONTEXT_CHARS,
+        "max_context_files": MAX_CONTEXT_FILES,
+        "context_window_lines": CONTEXT_WINDOW_LINES,
+    }
+    return (context_out, stats) if include_stats else context_out
+
+def evaluate_task(task, samples_per_task=1, context_debug=False):
     task_id = task['task_id']
     print(f"Evaluating Task {task_id}: {task['title']}")
     sample_results = []
@@ -266,8 +478,30 @@ def evaluate_task(task, samples_per_task=1):
         reset_environment()
         unsolved = unsolve_task(task)
         
-        code_context = get_context_for_task(task)
-        full_prompt = task['prompt'] + code_context
+        prompt_text = task.get('prompt') if isinstance(task.get('prompt'), str) else str(task.get('prompt', ''))
+        if context_debug:
+            code_context, context_stats = get_context_for_task(task, include_stats=True)
+        else:
+            code_context = get_context_for_task(task)
+            context_stats = None
+        full_prompt = prompt_text + code_context
+
+        if context_debug and context_stats is not None:
+            prompt_chars = len(prompt_text)
+            prompt_tokens = estimate_tokens(prompt_text)
+            full_prompt_chars = len(full_prompt)
+            full_prompt_tokens = estimate_tokens(full_prompt)
+            print(
+                "    Context debug: "
+                f"files={context_stats['files_included']}/{context_stats['candidate_files']} "
+                f"(missing={context_stats['files_missing']}, skipped_budget={context_stats['files_skipped_budget']}) | "
+                f"snippets={context_stats['snippets_included']} "
+                f"(truncated={context_stats['snippets_truncated']}) | "
+                f"context={context_stats['context_chars']} chars (~{context_stats['context_tokens_estimate']} tokens) | "
+                f"prompt={prompt_chars} chars (~{prompt_tokens} tokens) | "
+                f"full={full_prompt_chars} chars (~{full_prompt_tokens} tokens) | "
+                f"limits(chars={context_stats['max_context_chars']}, files={context_stats['max_context_files']}, window={context_stats['context_window_lines']})"
+            )
         
         if 'test_path' in task and 'test_content' in task:
             test_path = task['test_path']
@@ -386,10 +620,13 @@ def main():
     parser.add_argument("--provider", type=str)
     parser.add_argument("--task_id", type=str)
     parser.add_argument("--resume", action="store_true", help="Resume from existing results.json")
+    parser.add_argument("--context-debug", action="store_true", help="Print context assembly stats and token estimates")
     args = parser.parse_args()
-    global MODEL_NAME, MODEL_PROVIDER
+    global MODEL_NAME, MODEL_PROVIDER, CONTEXT_DEBUG
     if args.model: MODEL_NAME = args.model
     if args.provider: MODEL_PROVIDER = args.provider
+    if args.context_debug:
+        CONTEXT_DEBUG = True
     
     all_tasks = []
     if os.path.exists(args.tasks):
@@ -420,7 +657,7 @@ def main():
         if args.resume and task.get("task_id") in completed_task_ids:
             print(f"Skipping Task {task['task_id']} (already in results.json)")
             continue
-        task_res = evaluate_task(task, samples_per_task=args.samples)
+        task_res = evaluate_task(task, samples_per_task=args.samples, context_debug=CONTEXT_DEBUG)
         results["tasks"].append(task_res)
         results["total_samples"] += task_res["total_samples"]
         results["total_correct"] += task_res["correct_samples"]
