@@ -157,6 +157,94 @@ def generate_task_ollama(prompt):
         print(f"  Error: {e}")
         return None
 
+def extract_openai_output_text(result):
+    texts = []
+
+    direct = result.get("output_text")
+    if isinstance(direct, str) and direct.strip():
+        texts.append(direct.strip())
+
+    output_items = result.get("output")
+    if not isinstance(output_items, list):
+        return "\n".join(texts).strip()
+
+    for item in output_items:
+        if not isinstance(item, dict):
+            continue
+
+        item_type = item.get("type")
+        if item_type in {"output_text", "text"}:
+            value = item.get("text")
+            if isinstance(value, str) and value.strip():
+                texts.append(value.strip())
+            continue
+
+        if item_type != "message":
+            continue
+
+        content = item.get("content")
+        if not isinstance(content, list):
+            continue
+
+        for part in content:
+            if not isinstance(part, dict):
+                continue
+            part_type = part.get("type")
+            if part_type in {"output_text", "text"}:
+                value = part.get("text")
+                if isinstance(value, str) and value.strip():
+                    texts.append(value.strip())
+
+    deduped = []
+    for text in texts:
+        if text not in deduped:
+            deduped.append(text)
+    return "\n".join(deduped).strip()
+
+def summarize_openai_response(result):
+    parts = []
+    response_id = result.get("id")
+    status = result.get("status")
+    if response_id:
+        parts.append(f"id={response_id}")
+    if status:
+        parts.append(f"status={status}")
+
+    output_items = result.get("output")
+    if isinstance(output_items, list):
+        item_types = []
+        content_types = []
+        refusal_text = ""
+        for item in output_items:
+            if not isinstance(item, dict):
+                continue
+            item_type = item.get("type")
+            if item_type:
+                item_types.append(str(item_type))
+            if item_type != "message":
+                continue
+            content = item.get("content")
+            if not isinstance(content, list):
+                continue
+            for part in content:
+                if not isinstance(part, dict):
+                    continue
+                part_type = part.get("type")
+                if part_type:
+                    content_types.append(str(part_type))
+                if not refusal_text and part_type == "refusal":
+                    refusal_value = part.get("refusal")
+                    if isinstance(refusal_value, str) and refusal_value.strip():
+                        refusal_text = refusal_value.strip()
+        if item_types:
+            parts.append(f"output_types={sorted(set(item_types))}")
+        if content_types:
+            parts.append(f"content_types={sorted(set(content_types))}")
+        if refusal_text:
+            parts.append(f"refusal={refusal_text[:160]}")
+
+    return ", ".join(parts) if parts else "no metadata"
+
 def generate_task_openai(prompt):
     if not OPENAI_API_KEY:
         print("Error: OPENAI_API_KEY not found.")
@@ -190,10 +278,10 @@ def generate_task_openai(prompt):
                 return None
 
             result = response.json()
-            content_text = result.get("output_text", "")
+            content_text = extract_openai_output_text(result)
             if content_text:
                 return json.loads(content_text)
-            print("  Error: OpenAI response did not include output_text")
+            print(f"  Error: OpenAI response did not include text output ({summarize_openai_response(result)})")
             return None
         except Exception as e:
             print(f"  Error: {e}")

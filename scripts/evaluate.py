@@ -29,9 +29,19 @@ OPENAI_API_KEY = ENV.get("OPENAI_API_KEY")
 OLLAMA_HOST = ENV.get("OLLAMA_HOST", "http://localhost:11434")
 MODEL_REQUEST_TIMEOUT = 15 * 60  # Hard timeout for model calls (seconds).
 CONTEXT_WINDOW_LINES = int(ENV.get("CONTEXT_WINDOW_LINES", "60"))
-MAX_CONTEXT_CHARS = int(ENV.get("MAX_CONTEXT_CHARS", "120000"))
-MAX_CONTEXT_FILES = int(ENV.get("MAX_CONTEXT_FILES", "12"))
+MAX_TOKENS_K = int(ENV.get("MAX_TOKENS", "128"))
+MAX_PROMPT_TOKENS = max(1, MAX_TOKENS_K) * 1000
+MAX_CONTEXT_CHARS = int(ENV.get("MAX_CONTEXT_CHARS", str(MAX_PROMPT_TOKENS * 10)))
+MAX_CONTEXT_FILES = int(ENV.get("MAX_CONTEXT_FILES", "20"))
 CONTEXT_DEBUG = ENV.get("CONTEXT_DEBUG", "").strip().lower() in {"1", "true", "yes", "on"}
+MODEL_PROMPT_PREFIX = "Problem Description:\n"
+MODEL_SYSTEM_INSTRUCTION = """You are an expert Drupal 11 developer. 
+Solve the following problem by providing a valid git diff (patch).
+The patch should be applicable to a standard Drupal 11 installation using `git apply -p1`.
+Output ONLY the git diff. Do not include markdown code blocks.
+Ensure your patch uses a/ and b/ prefixes (e.g., --- a/core/modules/... and +++ b/core/modules/...).
+Focus on making the patch compatible with the current file contents provided in the context.
+"""
 
 def run_command(command, shell=True, timeout=None):
     try:
@@ -43,20 +53,12 @@ def run_command(command, shell=True, timeout=None):
         return False, "", str(e)
 
 def call_model(prompt):
-    system_instruction = """You are an expert Drupal 11 developer. 
-Solve the following problem by providing a valid git diff (patch).
-The patch should be applicable to a standard Drupal 11 installation using `git apply -p1`.
-Output ONLY the git diff. Do not include markdown code blocks.
-Ensure your patch uses a/ and b/ prefixes (e.g., --- a/core/modules/... and +++ b/core/modules/...).
-Focus on making the patch compatible with the current file contents provided in the context.
-"""
-    
     if MODEL_PROVIDER == "gemini":
-        return call_gemini(prompt, system_instruction)
+        return call_gemini(prompt, MODEL_SYSTEM_INSTRUCTION)
     elif MODEL_PROVIDER == "openai":
-        return call_openai(prompt, system_instruction)
+        return call_openai(prompt, MODEL_SYSTEM_INSTRUCTION)
     elif MODEL_PROVIDER == "ollama":
-        return call_ollama(prompt, system_instruction)
+        return call_ollama(prompt, MODEL_SYSTEM_INSTRUCTION)
     else:
         return None, f"Unknown model provider: {MODEL_PROVIDER}"
 
@@ -65,7 +67,7 @@ def call_gemini(prompt, system_instruction):
         return None, "GEMINI_API_KEY not found."
 
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL_NAME}:generateContent?key={GEMINI_API_KEY}"
-    full_prompt = f"{system_instruction}\n\nProblem Description:\n{prompt}"
+    full_prompt = f"{system_instruction}\n\n{MODEL_PROMPT_PREFIX}{prompt}"
     payload = {"contents": [{"parts": [{"text": full_prompt}]}]}
 
     try:
@@ -82,7 +84,7 @@ def call_gemini(prompt, system_instruction):
 
 def call_ollama(prompt, system_instruction):
     url = f"{OLLAMA_HOST}/api/generate"
-    full_prompt = f"{system_instruction}\n\nProblem Description:\n{prompt}"
+    full_prompt = f"{system_instruction}\n\n{MODEL_PROMPT_PREFIX}{prompt}"
     payload = {"model": MODEL_NAME, "prompt": full_prompt, "stream": False}
 
     try:
@@ -95,15 +97,103 @@ def call_ollama(prompt, system_instruction):
     except Exception as e:
         return None, str(e)
 
+def extract_openai_output_text(result):
+    texts = []
+
+    direct = result.get("output_text")
+    if isinstance(direct, str) and direct.strip():
+        texts.append(direct.strip())
+
+    output_items = result.get("output")
+    if not isinstance(output_items, list):
+        return "\n".join(texts).strip()
+
+    for item in output_items:
+        if not isinstance(item, dict):
+            continue
+
+        item_type = item.get("type")
+        if item_type in {"output_text", "text"}:
+            value = item.get("text")
+            if isinstance(value, str) and value.strip():
+                texts.append(value.strip())
+            continue
+
+        if item_type != "message":
+            continue
+
+        content = item.get("content")
+        if not isinstance(content, list):
+            continue
+
+        for part in content:
+            if not isinstance(part, dict):
+                continue
+            part_type = part.get("type")
+            if part_type in {"output_text", "text"}:
+                value = part.get("text")
+                if isinstance(value, str) and value.strip():
+                    texts.append(value.strip())
+
+    deduped = []
+    for text in texts:
+        if text not in deduped:
+            deduped.append(text)
+    return "\n".join(deduped).strip()
+
+def summarize_openai_response(result):
+    parts = []
+    response_id = result.get("id")
+    status = result.get("status")
+    if response_id:
+        parts.append(f"id={response_id}")
+    if status:
+        parts.append(f"status={status}")
+
+    output_items = result.get("output")
+    if isinstance(output_items, list):
+        item_types = []
+        content_types = []
+        refusal_text = ""
+        for item in output_items:
+            if not isinstance(item, dict):
+                continue
+            item_type = item.get("type")
+            if item_type:
+                item_types.append(str(item_type))
+            if item_type != "message":
+                continue
+            content = item.get("content")
+            if not isinstance(content, list):
+                continue
+            for part in content:
+                if not isinstance(part, dict):
+                    continue
+                part_type = part.get("type")
+                if part_type:
+                    content_types.append(str(part_type))
+                if not refusal_text and part_type == "refusal":
+                    refusal_value = part.get("refusal")
+                    if isinstance(refusal_value, str) and refusal_value.strip():
+                        refusal_text = refusal_value.strip()
+        if item_types:
+            parts.append(f"output_types={sorted(set(item_types))}")
+        if content_types:
+            parts.append(f"content_types={sorted(set(content_types))}")
+        if refusal_text:
+            parts.append(f"refusal={refusal_text[:160]}")
+
+    return ", ".join(parts) if parts else "no metadata"
+
 def call_openai(prompt, system_instruction):
     if not OPENAI_API_KEY:
         return None, "OPENAI_API_KEY not found."
 
     url = "https://api.openai.com/v1/responses"
-    full_prompt = f"{system_instruction}\n\nProblem Description:\n{prompt}"
     payload = {
         "model": MODEL_NAME,
-        "input": full_prompt,
+        "instructions": system_instruction,
+        "input": f"{MODEL_PROMPT_PREFIX}{prompt}",
     }
     headers = {
         "Authorization": f"Bearer {OPENAI_API_KEY}",
@@ -115,10 +205,10 @@ def call_openai(prompt, system_instruction):
         if response.status_code != 200:
             return None, f"OpenAI Error {response.status_code}: {response.text}"
         result = response.json()
-        text = result.get("output_text", "")
+        text = extract_openai_output_text(result)
         if text:
             return clean_patch_output(text), None
-        return None, "No output_text in response."
+        return None, f"No text output in OpenAI response ({summarize_openai_response(result)})."
     except Exception as e:
         return None, str(e)
 
@@ -350,7 +440,21 @@ def estimate_tokens(text):
         return 0
     return (len(text) + 3) // 4
 
-def get_context_for_task(task, include_stats=False):
+def trim_text_to_token_budget(text, token_budget, suffix="\n... [truncated]"):
+    if not text:
+        return ""
+    if token_budget <= 0:
+        return ""
+    max_chars = token_budget * 4
+    if len(text) <= max_chars:
+        return text
+    keep_chars = max_chars - len(suffix)
+    if keep_chars < 0:
+        keep_chars = max_chars
+    return text[:keep_chars].rstrip() + suffix
+
+def get_context_for_task(task, include_stats=False, max_context_chars=None):
+    context_char_budget = MAX_CONTEXT_CHARS if max_context_chars is None else max(0, int(max_context_chars))
     ground_truth = task.get("ground_truth")
     default_stats = {
         "candidate_files": 0,
@@ -362,7 +466,7 @@ def get_context_for_task(task, include_stats=False):
         "snippets_truncated": 0,
         "context_chars": 0,
         "context_tokens_estimate": 0,
-        "max_context_chars": MAX_CONTEXT_CHARS,
+        "max_context_chars": context_char_budget,
         "max_context_files": MAX_CONTEXT_FILES,
         "context_window_lines": CONTEXT_WINDOW_LINES,
     }
@@ -389,7 +493,7 @@ def get_context_for_task(task, include_stats=False):
     snippets_truncated = 0
 
     for _, _, _, f_path, ranges in prioritized_files:
-        if files_included >= MAX_CONTEXT_FILES or total_chars >= MAX_CONTEXT_CHARS:
+        if files_included >= MAX_CONTEXT_FILES or total_chars >= context_char_budget:
             files_skipped_budget += 1
             break
 
@@ -411,7 +515,7 @@ def get_context_for_task(task, include_stats=False):
             ranges = [(1, min(len(file_lines), 1))]
 
         file_sections = []
-        remaining_chars = MAX_CONTEXT_CHARS - total_chars
+        remaining_chars = context_char_budget - total_chars
         if remaining_chars <= 0:
             break
 
@@ -443,7 +547,7 @@ def get_context_for_task(task, include_stats=False):
             continue
 
         file_block = f"\nFile: {f_path}\n" + "".join(file_sections)
-        if total_chars + len(file_block) > MAX_CONTEXT_CHARS:
+        if total_chars + len(file_block) > context_char_budget:
             files_skipped_budget += 1
             continue
 
@@ -462,7 +566,7 @@ def get_context_for_task(task, include_stats=False):
         "snippets_truncated": snippets_truncated,
         "context_chars": len(context_out),
         "context_tokens_estimate": estimate_tokens(context_out),
-        "max_context_chars": MAX_CONTEXT_CHARS,
+        "max_context_chars": context_char_budget,
         "max_context_files": MAX_CONTEXT_FILES,
         "context_window_lines": CONTEXT_WINDOW_LINES,
     }
@@ -478,19 +582,30 @@ def evaluate_task(task, samples_per_task=1, context_debug=False):
         reset_environment()
         unsolved = unsolve_task(task)
         
-        prompt_text = task.get('prompt') if isinstance(task.get('prompt'), str) else str(task.get('prompt', ''))
+        raw_prompt_text = task.get('prompt') if isinstance(task.get('prompt'), str) else str(task.get('prompt', ''))
+        reserved_tokens = estimate_tokens(MODEL_SYSTEM_INSTRUCTION) + estimate_tokens(MODEL_PROMPT_PREFIX)
+        prompt_token_budget = max(0, MAX_PROMPT_TOKENS - reserved_tokens)
+        prompt_text = trim_text_to_token_budget(raw_prompt_text, prompt_token_budget)
+        prompt_tokens = estimate_tokens(prompt_text)
+        remaining_prompt_tokens = max(0, prompt_token_budget - prompt_tokens)
+        context_char_budget = min(MAX_CONTEXT_CHARS, remaining_prompt_tokens * 4)
         if context_debug:
-            code_context, context_stats = get_context_for_task(task, include_stats=True)
+            code_context, context_stats = get_context_for_task(
+                task,
+                include_stats=True,
+                max_context_chars=context_char_budget
+            )
         else:
-            code_context = get_context_for_task(task)
+            code_context = get_context_for_task(task, max_context_chars=context_char_budget)
             context_stats = None
         full_prompt = prompt_text + code_context
 
         if context_debug and context_stats is not None:
             prompt_chars = len(prompt_text)
-            prompt_tokens = estimate_tokens(prompt_text)
+            prompt_was_truncated = len(prompt_text) < len(raw_prompt_text)
             full_prompt_chars = len(full_prompt)
             full_prompt_tokens = estimate_tokens(full_prompt)
+            full_request_tokens = full_prompt_tokens + reserved_tokens
             print(
                 "    Context debug: "
                 f"files={context_stats['files_included']}/{context_stats['candidate_files']} "
@@ -498,9 +613,10 @@ def evaluate_task(task, samples_per_task=1, context_debug=False):
                 f"snippets={context_stats['snippets_included']} "
                 f"(truncated={context_stats['snippets_truncated']}) | "
                 f"context={context_stats['context_chars']} chars (~{context_stats['context_tokens_estimate']} tokens) | "
-                f"prompt={prompt_chars} chars (~{prompt_tokens} tokens) | "
+                f"prompt={prompt_chars} chars (~{prompt_tokens} tokens{', truncated' if prompt_was_truncated else ''}) | "
                 f"full={full_prompt_chars} chars (~{full_prompt_tokens} tokens) | "
-                f"limits(chars={context_stats['max_context_chars']}, files={context_stats['max_context_files']}, window={context_stats['context_window_lines']})"
+                f"request_estimate=~{full_request_tokens} tokens | "
+                f"limits(tokens={MAX_PROMPT_TOKENS}, chars={context_stats['max_context_chars']}, files={context_stats['max_context_files']}, window={context_stats['context_window_lines']})"
             )
         
         if 'test_path' in task and 'test_content' in task:
