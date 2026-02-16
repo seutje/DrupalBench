@@ -52,6 +52,42 @@ def run_command(command, shell=True, timeout=None):
     except Exception as e:
         return False, "", str(e)
 
+def ensure_drupal_container_ready():
+    success, container_id, stderr = run_command("docker-compose ps -q drupal")
+    container_id = container_id.strip()
+    if not success or not container_id:
+        details = (stderr or "").strip()
+        print("ERROR: Drupal container is not available. Start it before running evaluation.")
+        if details:
+            print(f"  Details: {details[:500]}")
+        print("  Try: docker-compose up -d drupal")
+        return False
+
+    success, state_raw, state_err = run_command(f"docker inspect -f '{{{{.State.Paused}}}} {{{{.State.Status}}}}' {container_id}")
+    if not success:
+        details = (state_err or "").strip()
+        print("ERROR: Could not inspect Drupal container state.")
+        if details:
+            print(f"  Details: {details[:500]}")
+        return False
+
+    state_parts = state_raw.strip().split()
+    is_paused = len(state_parts) > 0 and state_parts[0].lower() == "true"
+    status = state_parts[1].lower() if len(state_parts) > 1 else "unknown"
+
+    if is_paused:
+        print("ERROR: Drupal container is paused.")
+        print("  docker-compose exec fails with: cannot exec in a paused container (use --ignore-paused to override)")
+        print("  Unpause with: docker-compose unpause drupal")
+        return False
+
+    if status != "running":
+        print(f"ERROR: Drupal container is not running (status: {status}).")
+        print("  Start it with: docker-compose up -d drupal")
+        return False
+
+    return True
+
 def call_model(prompt):
     if MODEL_PROVIDER == "gemini":
         return call_gemini(prompt, MODEL_SYSTEM_INSTRUCTION)
@@ -212,17 +248,190 @@ def call_openai(prompt, system_instruction):
     except Exception as e:
         return None, str(e)
 
+def convert_apply_patch_to_unified(text):
+    if not text:
+        return text
+
+    markers = ("*** Begin Patch", "*** Update File:", "*** Add File:", "*** Delete File:")
+    if not any(marker in text for marker in markers):
+        return text
+
+    lines = text.replace('\r\n', '\n').split('\n')
+    out = []
+    i = 0
+
+    def collect_block(start_index):
+        block = []
+        j = start_index
+        while j < len(lines):
+            next_line = lines[j]
+            if next_line.startswith("*** "):
+                break
+            block.append(next_line)
+            j += 1
+        return block, j
+
+    while i < len(lines):
+        line = lines[i]
+
+        if line == "*** Begin Patch":
+            i += 1
+            continue
+        if line == "*** End Patch":
+            break
+        if line == "*** End of File":
+            i += 1
+            continue
+
+        if line.startswith("*** Update File: "):
+            path = line[len("*** Update File: "):].strip()
+            block_lines, i = collect_block(i + 1)
+            out.append(f"diff --git a/{path} b/{path}")
+            out.append(f"--- a/{path}")
+            out.append(f"+++ b/{path}")
+            out.extend(block_lines)
+            continue
+
+        if line.startswith("*** Add File: "):
+            path = line[len("*** Add File: "):].strip()
+            block_lines, i = collect_block(i + 1)
+            out.append(f"diff --git a/{path} b/{path}")
+            out.append("new file mode 100644")
+            out.append("--- /dev/null")
+            out.append(f"+++ b/{path}")
+            if not any(l.startswith("@@") for l in block_lines) and block_lines:
+                out.append("@@")
+            for block_line in block_lines:
+                if block_line.startswith(("+", "@@", "\\")):
+                    out.append(block_line)
+                elif block_line == "":
+                    out.append("+")
+                else:
+                    out.append("+" + block_line.lstrip(" "))
+            continue
+
+        if line.startswith("*** Delete File: "):
+            path = line[len("*** Delete File: "):].strip()
+            block_lines, i = collect_block(i + 1)
+            out.append(f"diff --git a/{path} b/{path}")
+            out.append("deleted file mode 100644")
+            out.append(f"--- a/{path}")
+            out.append("+++ /dev/null")
+            if not any(l.startswith("@@") for l in block_lines) and block_lines:
+                out.append("@@")
+            for block_line in block_lines:
+                if block_line.startswith(("-", "@@", "\\")):
+                    out.append(block_line)
+                elif block_line == "":
+                    out.append("-")
+                else:
+                    out.append("-" + block_line.lstrip(" "))
+            continue
+
+        i += 1
+
+    if not out:
+        return text
+    result = "\n".join(out).rstrip("\n")
+    return result + "\n"
+
+def ensure_diff_headers(text):
+    if not text:
+        return text
+
+    def extract_marker_path(marker_line):
+        return marker_line[4:].strip().split('\t')[0].split(' ')[0]
+
+    def to_diff_token(path, default_prefix):
+        if path == "/dev/null":
+            return path
+        if path.startswith("a/") or path.startswith("b/"):
+            return path
+        return f"{default_prefix}/{path}"
+
+    lines = text.split('\n')
+    out = []
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        if line.startswith('--- ') and i + 1 < len(lines) and lines[i + 1].startswith('+++ '):
+            has_diff_header = False
+            j = len(out) - 1
+            while j >= 0:
+                prev = out[j].strip()
+                if not prev:
+                    j -= 1
+                    continue
+                has_diff_header = prev.startswith("diff --git ")
+                break
+            if not has_diff_header:
+                old_path = extract_marker_path(line)
+                new_path = extract_marker_path(lines[i + 1])
+                diff_old = to_diff_token(old_path, "a")
+                diff_new = to_diff_token(new_path, "b")
+                out.append(f"diff --git {diff_old} {diff_new}")
+            out.append(line)
+            out.append(lines[i + 1])
+            i += 2
+            continue
+        out.append(line)
+        i += 1
+
+    result = "\n".join(out).rstrip("\n")
+    return result + "\n" if result else ""
+
+def drop_empty_diff_sections(text):
+    if not text:
+        return text
+
+    lines = text.split('\n')
+    out = []
+    current_section = []
+    in_diff_section = False
+    section_has_changes = False
+
+    def flush_section():
+        nonlocal current_section, section_has_changes, in_diff_section
+        if not current_section:
+            return
+        if not current_section[0].startswith("diff --git ") or section_has_changes:
+            out.extend(current_section)
+        current_section = []
+        section_has_changes = False
+        in_diff_section = False
+
+    for line in lines:
+        if line.startswith("diff --git "):
+            flush_section()
+            current_section = [line]
+            in_diff_section = True
+            continue
+
+        if in_diff_section:
+            current_section.append(line)
+            if line.startswith("@@") or line.startswith("new file mode ") or \
+               line.startswith("deleted file mode ") or line.startswith("Binary files "):
+                section_has_changes = True
+            continue
+
+        out.append(line)
+
+    flush_section()
+    result = "\n".join(out).rstrip("\n")
+    return result + "\n" if result else ""
+
 def clean_patch_output(text):
+    text = text.replace('\r\n', '\n')
     code_blocks = re.findall(r'```(?:\w+)?\s*(.*?)\s*```', text, re.DOTALL)
     if code_blocks:
         cleaned_text = ""
         for block in code_blocks:
-            if '--- ' in block or '+++ ' in block or '@@ ' in block:
+            if '--- ' in block or '+++ ' in block or '@@' in block or '*** Begin Patch' in block:
                 cleaned_text += block + "\n"
         if cleaned_text:
             text = cleaned_text
     
-    patterns = ['diff --git', '--- ', 'Index: ']
+    patterns = ['*** Begin Patch', '*** Update File:', 'diff --git', '--- ', 'Index: ']
     first_idx = len(text)
     found = False
     for p in patterns:
@@ -233,64 +442,188 @@ def clean_patch_output(text):
     
     if found:
         text = text[first_idx:]
-    
-    text = text.replace('\r\n', '\n')
+
+    text = convert_apply_patch_to_unified(text)
+    control_lines = {"*** begin patch", "*** end patch", "*** end of patch", "*** end of file"}
+    filtered_lines = [line for line in text.split('\n') if line.strip().lower() not in control_lines]
+    text = ensure_diff_headers("\n".join(filtered_lines))
     return text
 
 def fix_hunk_headers(patch_text):
     if not patch_text:
         return patch_text
-        
+
+    def parse_diff_git_paths(diff_line):
+        match = re.match(r'^diff --git\s+(\S+)\s+(\S+)', diff_line)
+        if not match:
+            return None, None
+        return match.group(1), match.group(2)
+
+    def parse_hunk_header(header_line):
+        match = re.match(r'^@@\s*-(\d+)?(?:,(\d+))?\s+\+(\d+)?(?:,(\d+))?\s*@@(.*)$', header_line)
+        if not match:
+            return None
+        old_start, old_len, new_start, new_len, rest = match.groups()
+        if old_start is None or new_start is None:
+            return None
+        return int(old_start), old_len, int(new_start), new_len, rest
+
+    def normalize_hunk_lines(raw_hunk_lines):
+        normalized = []
+        old_len = 0
+        new_len = 0
+        has_changes = False
+        for h_line in raw_hunk_lines:
+            if h_line.startswith('-'):
+                old_len += 1
+                has_changes = True
+                normalized.append(h_line)
+            elif h_line.startswith('+'):
+                new_len += 1
+                has_changes = True
+                normalized.append(h_line)
+            elif h_line.startswith(' '):
+                old_len += 1
+                new_len += 1
+                normalized.append(h_line)
+            elif h_line.startswith('\\'):
+                normalized.append(h_line)
+            elif h_line == '':
+                old_len += 1
+                new_len += 1
+                normalized.append(' ')
+            else:
+                old_len += 1
+                new_len += 1
+                normalized.append(' ' + h_line)
+        return normalized, old_len, new_len, has_changes
+
+    def ensure_file_markers(current_old, current_new):
+        markers = []
+        if current_old:
+            markers.append(f"--- {current_old}")
+        if current_new:
+            markers.append(f"+++ {current_new}")
+        return markers
+
     lines = patch_text.split('\n')
     fixed_lines = []
     i = 0
+    current_old_path = None
+    current_new_path = None
+    saw_old_marker = False
+    saw_new_marker = False
+    old_cursor = 1
+    new_cursor = 1
+    force_old_dev_null = False
+    force_new_dev_null = False
+
+    def maybe_emit_missing_file_markers():
+        nonlocal saw_old_marker, saw_new_marker
+        if not saw_old_marker or not saw_new_marker:
+            fixed_lines.extend(ensure_file_markers(current_old_path, current_new_path))
+            saw_old_marker = saw_old_marker or bool(current_old_path)
+            saw_new_marker = saw_new_marker or bool(current_new_path)
+
     while i < len(lines):
         line = lines[i]
+        if line.startswith('diff --git '):
+            diff_old, diff_new = parse_diff_git_paths(line)
+            current_old_path = diff_old
+            current_new_path = diff_new
+            saw_old_marker = False
+            saw_new_marker = False
+            old_cursor = 0 if diff_old == '/dev/null' else 1
+            new_cursor = 0 if diff_new == '/dev/null' else 1
+            force_old_dev_null = False
+            force_new_dev_null = False
+            fixed_lines.append(line)
+            i += 1
+            continue
+
+        if line.startswith('new file mode '):
+            force_old_dev_null = True
+            current_old_path = '/dev/null'
+            old_cursor = 0
+            fixed_lines.append(line)
+            i += 1
+            continue
+
+        if line.startswith('deleted file mode '):
+            force_new_dev_null = True
+            current_new_path = '/dev/null'
+            new_cursor = 0
+            fixed_lines.append(line)
+            i += 1
+            continue
+
+        if line.startswith('--- '):
+            old_marker = '/dev/null' if force_old_dev_null else line[4:].strip()
+            current_old_path = old_marker
+            saw_old_marker = True
+            if current_old_path == '/dev/null':
+                old_cursor = 0
+            fixed_lines.append(f"--- {old_marker}")
+            i += 1
+            continue
+
+        if line.startswith('+++ '):
+            new_marker = '/dev/null' if force_new_dev_null else line[4:].strip()
+            current_new_path = new_marker
+            saw_new_marker = True
+            if current_new_path == '/dev/null':
+                new_cursor = 0
+            fixed_lines.append(f"+++ {new_marker}")
+            i += 1
+            continue
+
         if line.startswith('@@'):
-            match = re.match(r'@@ -(\d+),?(\d*) \+(\d+),?(\d*) @@(.*)', line)
-            if match:
-                old_start, _, new_start, _, rest = match.groups()
-                actual_old_len = 0
-                actual_new_len = 0
-                hunk_lines = []
-                j = i + 1
-                while j < len(lines):
-                    h_line = lines[j]
-                    if h_line.startswith('@@') or h_line.startswith('diff --git') or \
-                       h_line.startswith('--- ') or h_line.startswith('+++ ') or \
-                       h_line.startswith('Index: '):
-                        break
-                    if h_line.startswith('-'):
-                        actual_old_len += 1
-                        hunk_lines.append(h_line)
-                    elif h_line.startswith('+'):
-                        actual_new_len += 1
-                        hunk_lines.append(h_line)
-                    elif h_line.startswith(' '):
-                        actual_old_len += 1
-                        actual_new_len += 1
-                        hunk_lines.append(h_line)
-                    elif h_line == '':
-                        actual_old_len += 1
-                        actual_new_len += 1
-                        hunk_lines.append(' ')
-                    elif h_line.startswith('\\'):
-                        hunk_lines.append(h_line)
-                    else:
-                        actual_old_len += 1
-                        actual_new_len += 1
-                        hunk_lines.append(' ' + h_line)
-                    j += 1
-                new_header = f"@@ -{old_start},{actual_old_len} +{new_start},{actual_new_len} @@{rest}"
-                fixed_lines.append(new_header)
-                fixed_lines.extend(hunk_lines)
+            maybe_emit_missing_file_markers()
+            raw_hunk_lines = []
+            j = i + 1
+            while j < len(lines):
+                h_line = lines[j]
+                if h_line.startswith('@@') or h_line.startswith('diff --git') or \
+                   h_line.startswith('--- ') or h_line.startswith('+++ ') or \
+                   h_line.startswith('Index: ') or h_line.startswith('*** '):
+                    break
+                raw_hunk_lines.append(h_line)
+                j += 1
+
+            normalized_hunk_lines, actual_old_len, actual_new_len, has_changes = normalize_hunk_lines(raw_hunk_lines)
+            parsed_header = parse_hunk_header(line)
+            if parsed_header:
+                old_start, _, new_start, _, rest = parsed_header
+            else:
+                old_start = old_cursor
+                new_start = new_cursor
+                rest = ""
+
+            if old_start is None:
+                old_start = old_cursor
+            if new_start is None:
+                new_start = new_cursor
+
+            if not has_changes:
+                old_cursor = old_start + actual_old_len
+                new_cursor = new_start + actual_new_len
                 i = j
                 continue
+
+            new_header = f"@@ -{old_start},{actual_old_len} +{new_start},{actual_new_len} @@{rest}"
+            fixed_lines.append(new_header)
+            fixed_lines.extend(normalized_hunk_lines)
+            old_cursor = old_start + actual_old_len
+            new_cursor = new_start + actual_new_len
+            i = j
+            continue
+
         fixed_lines.append(line)
         i += 1
     result = '\n'.join(fixed_lines).rstrip('\n')
-    if result: result += '\n'
-    return result
+    if result:
+        result += '\n'
+    return drop_empty_diff_sections(result)
 
 def reset_environment():
     print("  Resetting environment...")
@@ -641,32 +974,44 @@ def evaluate_task(task, samples_per_task=1, context_debug=False):
         run_command(f"docker cp temp.patch {container_id.strip()}:/var/www/html/task.patch")
         
         patch_applied = False
+        last_apply_error = ""
         # Try git apply first with various options
         for directory in ["web", "."]:
-            for p_arg in ["-p1", "-p0"]:
-                for extra in ["", "--3way"]:
+            for p_arg in ["-p1", "-p0", "-p2"]:
+                for extra in ["", "--unidiff-zero", "--3way", "--3way --unidiff-zero"]:
                     cmd = f"docker-compose exec -T drupal git apply -v {extra} --recount --whitespace=fix {p_arg} --directory={directory} /var/www/html/task.patch"
-                    if run_command(cmd)[0]:
+                    success, stdout, stderr = run_command(cmd)
+                    if success:
                         print(f"    Patch applied with git apply {extra} {p_arg} --directory={directory}")
                         patch_applied = True
                         break
+                    output = f"{stdout}{stderr}".strip()
+                    if output:
+                        last_apply_error = output
                 if patch_applied: break
             if patch_applied: break
         
         if not patch_applied:
             # Fallback to patch utility
             for directory in ["web", "."]:
-                for p_level in ["-p1", "-p0"]:
+                for p_level in ["-p1", "-p0", "-p2"]:
                     cmd = f"docker-compose exec -T drupal patch {p_level} --fuzz=3 -l -t -N -d {directory} -i /var/www/html/task.patch"
-                    if run_command(cmd)[0]:
+                    success, stdout, stderr = run_command(cmd)
+                    if success:
                         print(f"    Patch applied with patch {p_level} --fuzz in {directory}")
                         patch_applied = True
                         break
+                    output = f"{stdout}{stderr}".strip()
+                    if output:
+                        last_apply_error = output
                 if patch_applied: break
                 
         if not patch_applied:
             print(f"    FAILED to apply patch.")
-            sample_results.append({"passed": False, "patch": patch, "error": "Patch application failed"})
+            failure = {"passed": False, "patch": patch, "error": "Patch application failed"}
+            if last_apply_error:
+                failure["apply_error"] = last_apply_error[:3000]
+            sample_results.append(failure)
             continue
 
         test_files = []
@@ -743,6 +1088,9 @@ def main():
     if args.provider: MODEL_PROVIDER = args.provider
     if args.context_debug:
         CONTEXT_DEBUG = True
+
+    if not ensure_drupal_container_ready():
+        sys.exit(1)
     
     all_tasks = []
     if os.path.exists(args.tasks):
