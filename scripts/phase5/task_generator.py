@@ -24,7 +24,11 @@ MODEL_PROVIDER = ENV.get("MODEL_PROVIDER", "gemini")
 MODEL_NAME = ENV.get("MODEL_NAME", "gemini-3-flash-preview")
 GEMINI_API_KEY = ENV.get("GEMINI_API_KEY")
 OPENAI_API_KEY = ENV.get("OPENAI_API_KEY")
+OPENROUTER_API_KEY = ENV.get("OPENROUTER_API_KEY")
 OLLAMA_HOST = ENV.get("OLLAMA_HOST", "http://localhost:11434")
+OPENROUTER_BASE_URL = ENV.get("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
+OPENROUTER_HTTP_REFERER = ENV.get("OPENROUTER_HTTP_REFERER")
+OPENROUTER_X_TITLE = ENV.get("OPENROUTER_X_TITLE")
 MODEL_REQUEST_TIMEOUT = 15 * 60
 
 def scrape_change_records(limit=5):
@@ -90,6 +94,8 @@ def generate_task(change_record):
         task = generate_task_gemini(prompt)
     elif MODEL_PROVIDER == "openai":
         task = generate_task_openai(prompt)
+    elif MODEL_PROVIDER == "openrouter":
+        task = generate_task_openrouter(prompt)
     elif MODEL_PROVIDER == "ollama":
         task = generate_task_ollama(prompt)
     else:
@@ -245,6 +251,37 @@ def summarize_openai_response(result):
 
     return ", ".join(parts) if parts else "no metadata"
 
+def extract_openrouter_output_text(result):
+    texts = []
+    choices = result.get("choices")
+    if not isinstance(choices, list):
+        return ""
+
+    for choice in choices:
+        if not isinstance(choice, dict):
+            continue
+        message = choice.get("message")
+        if not isinstance(message, dict):
+            continue
+        content = message.get("content")
+        if isinstance(content, str) and content.strip():
+            texts.append(content.strip())
+            continue
+        if not isinstance(content, list):
+            continue
+        for part in content:
+            if not isinstance(part, dict):
+                continue
+            text = part.get("text")
+            if isinstance(text, str) and text.strip():
+                texts.append(text.strip())
+
+    deduped = []
+    for text in texts:
+        if text not in deduped:
+            deduped.append(text)
+    return "\n".join(deduped).strip()
+
 def generate_task_openai(prompt):
     if not OPENAI_API_KEY:
         print("Error: OPENAI_API_KEY not found.")
@@ -288,6 +325,49 @@ def generate_task_openai(prompt):
             time.sleep(2)
     return None
 
+def generate_task_openrouter(prompt):
+    if not OPENROUTER_API_KEY:
+        print("Error: OPENROUTER_API_KEY not found.")
+        return None
+
+    url = f"{OPENROUTER_BASE_URL.rstrip('/')}/chat/completions"
+    payload = {
+        "model": MODEL_NAME,
+        "messages": [{"role": "user", "content": prompt}],
+        "response_format": {"type": "json_object"},
+    }
+    headers = {
+        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+        "Content-Type": "application/json",
+    }
+    if OPENROUTER_HTTP_REFERER:
+        headers["HTTP-Referer"] = OPENROUTER_HTTP_REFERER
+    if OPENROUTER_X_TITLE:
+        headers["X-Title"] = OPENROUTER_X_TITLE
+
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            response = requests.post(url, json=payload, headers=headers, timeout=MODEL_REQUEST_TIMEOUT)
+            if response.status_code == 429:
+                wait_time = (attempt + 1) * 5
+                time.sleep(wait_time)
+                continue
+            if response.status_code != 200:
+                print(f"  OpenRouter Error {response.status_code}: {response.text}")
+                return None
+
+            result = response.json()
+            content_text = extract_openrouter_output_text(result)
+            if content_text:
+                return json.loads(content_text)
+            print("  Error: OpenRouter response did not include text output.")
+            return None
+        except Exception as e:
+            print(f"  Error: {e}")
+            time.sleep(2)
+    return None
+
 def main():
     parser = argparse.ArgumentParser(description="Generate synthetic Drupal 11 tasks.")
     parser.add_argument("--limit", type=int, default=5, help="Number of change records to process.")
@@ -301,6 +381,9 @@ def main():
         sys.exit(1)
     if MODEL_PROVIDER == "openai" and not OPENAI_API_KEY:
         print("Error: OPENAI_API_KEY not found in .env")
+        sys.exit(1)
+    if MODEL_PROVIDER == "openrouter" and not OPENROUTER_API_KEY:
+        print("Error: OPENROUTER_API_KEY not found in .env")
         sys.exit(1)
 
     print("Scraping Drupal 11 Change Records...")

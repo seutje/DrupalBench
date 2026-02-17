@@ -37,6 +37,10 @@ GEMINI_API_KEY=your_api_key_here
 # MODEL_PROVIDER=openai
 # MODEL_NAME=gpt-4.1-mini
 # OPENAI_API_KEY=your_api_key_here
+# or for OpenRouter
+# MODEL_PROVIDER=openrouter
+# MODEL_NAME=openai/gpt-4o-mini
+# OPENROUTER_API_KEY=your_api_key_here
 # or for local Ollama
 # MODEL_PROVIDER=ollama
 # MODEL_NAME=llama3.1

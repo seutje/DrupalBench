@@ -26,7 +26,11 @@ MODEL_PROVIDER = ENV.get("MODEL_PROVIDER", "gemini")
 MODEL_NAME = ENV.get("MODEL_NAME", "gemini-3-flash-preview")
 GEMINI_API_KEY = ENV.get("GEMINI_API_KEY")
 OPENAI_API_KEY = ENV.get("OPENAI_API_KEY")
+OPENROUTER_API_KEY = ENV.get("OPENROUTER_API_KEY")
 OLLAMA_HOST = ENV.get("OLLAMA_HOST", "http://localhost:11434")
+OPENROUTER_BASE_URL = ENV.get("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
+OPENROUTER_HTTP_REFERER = ENV.get("OPENROUTER_HTTP_REFERER")
+OPENROUTER_X_TITLE = ENV.get("OPENROUTER_X_TITLE")
 MODEL_REQUEST_TIMEOUT = 15 * 60  # Hard timeout for model calls (seconds).
 CONTEXT_WINDOW_LINES = int(ENV.get("CONTEXT_WINDOW_LINES", "60"))
 MAX_TOKENS_K = int(ENV.get("MAX_TOKENS", "128"))
@@ -93,6 +97,8 @@ def call_model(prompt):
         return call_gemini(prompt, MODEL_SYSTEM_INSTRUCTION)
     elif MODEL_PROVIDER == "openai":
         return call_openai(prompt, MODEL_SYSTEM_INSTRUCTION)
+    elif MODEL_PROVIDER == "openrouter":
+        return call_openrouter(prompt, MODEL_SYSTEM_INSTRUCTION)
     elif MODEL_PROVIDER == "ollama":
         return call_ollama(prompt, MODEL_SYSTEM_INSTRUCTION)
     else:
@@ -221,6 +227,37 @@ def summarize_openai_response(result):
 
     return ", ".join(parts) if parts else "no metadata"
 
+def extract_openrouter_output_text(result):
+    texts = []
+    choices = result.get("choices")
+    if not isinstance(choices, list):
+        return ""
+
+    for choice in choices:
+        if not isinstance(choice, dict):
+            continue
+        message = choice.get("message")
+        if not isinstance(message, dict):
+            continue
+        content = message.get("content")
+        if isinstance(content, str) and content.strip():
+            texts.append(content.strip())
+            continue
+        if not isinstance(content, list):
+            continue
+        for part in content:
+            if not isinstance(part, dict):
+                continue
+            text = part.get("text")
+            if isinstance(text, str) and text.strip():
+                texts.append(text.strip())
+
+    deduped = []
+    for text in texts:
+        if text not in deduped:
+            deduped.append(text)
+    return "\n".join(deduped).strip()
+
 def call_openai(prompt, system_instruction):
     if not OPENAI_API_KEY:
         return None, "OPENAI_API_KEY not found."
@@ -245,6 +282,39 @@ def call_openai(prompt, system_instruction):
         if text:
             return clean_patch_output(text), None
         return None, f"No text output in OpenAI response ({summarize_openai_response(result)})."
+    except Exception as e:
+        return None, str(e)
+
+def call_openrouter(prompt, system_instruction):
+    if not OPENROUTER_API_KEY:
+        return None, "OPENROUTER_API_KEY not found."
+
+    url = f"{OPENROUTER_BASE_URL.rstrip('/')}/chat/completions"
+    payload = {
+        "model": MODEL_NAME,
+        "messages": [
+            {"role": "system", "content": system_instruction},
+            {"role": "user", "content": f"{MODEL_PROMPT_PREFIX}{prompt}"},
+        ],
+    }
+    headers = {
+        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+        "Content-Type": "application/json",
+    }
+    if OPENROUTER_HTTP_REFERER:
+        headers["HTTP-Referer"] = OPENROUTER_HTTP_REFERER
+    if OPENROUTER_X_TITLE:
+        headers["X-Title"] = OPENROUTER_X_TITLE
+
+    try:
+        response = requests.post(url, json=payload, headers=headers, timeout=MODEL_REQUEST_TIMEOUT)
+        if response.status_code != 200:
+            return None, f"OpenRouter Error {response.status_code}: {response.text}"
+        result = response.json()
+        text = extract_openrouter_output_text(result)
+        if text:
+            return clean_patch_output(text), None
+        return None, "No text output in OpenRouter response."
     except Exception as e:
         return None, str(e)
 
