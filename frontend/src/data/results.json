@@ -3375,9 +3375,9 @@
     "model_name": "gemini-3-flash-preview",
     "total_tasks": 46,
     "total_samples": 460,
-    "total_correct": 60,
-    "pass_at_1": 0.13043478260869565,
-    "pass_at_5": 0.161231884057971,
+    "total_correct": 134,
+    "pass_at_1": 0.29130434782608694,
+    "pass_at_5": 0.3642167011732229,
     "tasks": [
       {
         "task_id": "2381293",
@@ -3395,7 +3395,7 @@
         "task_id": "3505370",
         "title": "Remove 'filter tips' page and deprecate the long format API",
         "passed": false,
-        "quality_summary": "HTTPSConnectionPool(host='generativelanguage.googleapis.com', port=443): Read timed out. (read timeout=900)",
+        "quality_summary": "Patch application failed",
         "domain_results": {
           "backend": {
             "passed": false,
@@ -3411,7 +3411,7 @@
         "domain_results": {
           "backend": {
             "passed": true,
-            "output": "\n--- Output for core/modules/migrate/tests/src/Functional/process/DownloadFunctionalTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n.                                                                   1 / 1 (100%)\n\nHTML output was generated.\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_migrate_Functional_process_DownloadFunctionalTest-1-42130648.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_migrate_Functional_process_DownloadFunctionalTest-2-42130648.html\n\n\nTime: 00:06.261, Memory: 10.00 MB\n\nOK (1 test, 12 assertions)\n"
+            "output": "\n--- Output for core/modules/migrate/tests/src/Functional/process/DownloadFunctionalTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n.                                                                   1 / 1 (100%)\n\nHTML output was generated.\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_migrate_Functional_process_DownloadFunctionalTest-1-20069910.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_migrate_Functional_process_DownloadFunctionalTest-2-20069910.html\n\n\nTime: 00:02.989, Memory: 10.00 MB\n\nOK (1 test, 12 assertions)\n"
           }
         }
       },
@@ -3423,7 +3423,7 @@
         "domain_results": {
           "backend": {
             "passed": true,
-            "output": "\n--- Output for core/modules/block/tests/src/Functional/BlockHtmlTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n.                                                                   1 / 1 (100%)\n\nHTML output was generated.\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockHtmlTest-1-57318489.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockHtmlTest-2-57318489.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockHtmlTest-3-57318489.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockHtmlTest-4-57318489.html\n\n\nTime: 00:06.258, Memory: 10.00 MB\n\nOK (1 test, 7 assertions)\n"
+            "output": "\n--- Output for core/modules/block/tests/src/Functional/BlockHtmlTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n.                                                                   1 / 1 (100%)\n\nHTML output was generated.\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockHtmlTest-1-45582281.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockHtmlTest-2-45582281.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockHtmlTest-3-45582281.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockHtmlTest-4-45582281.html\n\n\nTime: 00:02.944, Memory: 10.00 MB\n\nOK (1 test, 7 assertions)\n"
           }
         }
       },
@@ -3431,11 +3431,11 @@
         "task_id": "3057267",
         "title": "Stop automatically logging out users during maintenance mode",
         "passed": false,
-        "quality_summary": "Patch application failed",
+        "quality_summary": "Test Failures",
         "domain_results": {
           "backend": {
             "passed": false,
-            "output": "No output available"
+            "output": "\n--- Output for core/modules/jsonapi/tests/src/Functional/JsonApiFunctionalTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\nF.....                                                              6 / 6 (100%)\n\nHTML output was generated.\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_jsonapi_Functional_JsonApiFunctionalTest-1-73525836.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_jsonapi_Functional_JsonApiFunctionalTest-2-73525836.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_jsonapi_Functional_JsonApiFunctionalTest-3-73525836.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_jsonapi_Functional_JsonApiFunctionalTest-4-73525836.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_jsonapi_Functional_JsonApiFunctionalTest-5-73525836.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_jsonapi_Func"
           }
         }
       },
@@ -3443,11 +3443,11 @@
         "task_id": "3560357",
         "title": "Taxonomy term ID from URL ViewsArgumentDefault plugin does not apply node cache tags when \"Load filter from node page\" is selected",
         "passed": false,
-        "quality_summary": "Patch application failed",
+        "quality_summary": "Test Failures",
         "domain_results": {
           "backend": {
             "passed": false,
-            "output": "No output available"
+            "output": "\n--- Output for core/modules/taxonomy/tests/src/Kernel/Views/TaxonomyDefaultArgumentTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\nEEE                                                                 3 / 3 (100%)\n\nTime: 00:08.667, Memory: 12.00 MB\n\nThere were 3 errors:\n\n1) Drupal\\Tests\\taxonomy\\Kernel\\Views\\TaxonomyDefaultArgumentTest::testNodePath\nError: Call to undefined method Drupal\\views\\ViewExecutable::addCacheableDependency()\n\n/var/www/html/web/core/modules/taxonomy/src/Plugin/views/argument_default/Tid.php:171\n/var/www/html/web/core/modules/views/src/Plugin/views/argument/ArgumentPluginBase.php:895\n/var/www/html/web/core/modules/taxonomy/tests/src/Kernel/Views/TaxonomyDefaultArgumentTest.php:65\n\n2) Drupal\\Tests\\taxonomy\\Kernel\\Views\\TaxonomyDefaultArgumentTest::testNodePathWithViewSelection\nError: Call to undefined method Drupal\\views\\ViewExecutable::addCacheableDependency()\n\n/var"
           }
         }
       },
@@ -3455,11 +3455,11 @@
         "task_id": "3544395",
         "title": "Current user missing from language negotiator outside of request context",
         "passed": false,
-        "quality_summary": "Test Failures",
+        "quality_summary": "Patch application failed",
         "domain_results": {
           "backend": {
             "passed": false,
-            "output": "\n--- Output for core/modules/language/tests/src/Kernel/ConfigurableLanguageManagerTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n.                                                                   1 / 1 (100%)\n\nTime: 00:02.271, Memory: 10.00 MB\n\nOK (1 test, 3 assertions)\n\n--- Output for core/modules/ckeditor5/tests/src/Kernel/LanguageTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n....                                                                4 / 4 (100%)\n\nTime: 00:05.446, Memory: 10.00 MB\n\nOK (4 tests, 5 assertions)\n\n--- Output for core/modules/path/tests/src/Kernel/PathNoCanonicalLinkTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\nW                                                       "
+            "output": "No output available"
           }
         }
       },
@@ -3471,7 +3471,7 @@
         "domain_results": {
           "backend": {
             "passed": true,
-            "output": "\n--- Output for core/modules/block/tests/src/Functional/BlockTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n..............                                                    14 / 14 (100%)\n\nHTML output was generated.\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockTest-1-80855322.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockTest-2-80855322.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockTest-3-80855322.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockTest-4-80855322.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockTest-5-80855322.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockTest-6-80855322.html\nhttp://localhost/sites/simpletest/browser_output/Drup"
+            "output": "\n--- Output for core/modules/block/tests/src/Functional/BlockTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n..............                                                    14 / 14 (100%)\n\nHTML output was generated.\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockTest-1-42035676.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockTest-2-42035676.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockTest-3-42035676.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockTest-4-42035676.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockTest-5-42035676.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockTest-6-42035676.html\nhttp://localhost/sites/simpletest/browser_output/Drup"
           }
         }
       },
@@ -3483,7 +3483,7 @@
         "domain_results": {
           "backend": {
             "passed": true,
-            "output": "\n--- Output for core/modules/system/tests/src/Kernel/Form/ProgrammaticTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n.F                                                                  2 / 2 (100%)\n\nTime: 00:00.926, Memory: 10.00 MB\n\nThere was 1 failure:\n\n1) Drupal\\Tests\\system\\Kernel\\Form\\ProgrammaticTest::testProgrammaticAccessBypass\nThe value for the restricted field is stored correctly.\nFailed asserting that two strings are equal.\n--- Expected\n+++ Actual\n@@ @@\n-'dummy value'\n+''\n\n/var/www/html/web/core/modules/system/tests/src/Kernel/Form/ProgrammaticTest.php:114\n\nFAILURES!\nTests: 2, Assertions: 25, Failures: 1.\n"
+            "output": "\n--- Output for core/modules/system/tests/src/Kernel/Form/ProgrammaticTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n..                                                                  2 / 2 (100%)\n\nTime: 00:00.607, Memory: 10.00 MB\n\nOK (2 tests, 25 assertions)\n"
           }
         }
       },
@@ -3495,7 +3495,7 @@
         "domain_results": {
           "backend": {
             "passed": true,
-            "output": "\n--- Output for core/modules/mysql/tests/src/Unit/InstallTasksTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n...                                                                 3 / 3 (100%)\n\nTime: 00:00.021, Memory: 14.00 MB\n\nOK (3 tests, 7 assertions)\n"
+            "output": "\n--- Output for core/modules/mysql/tests/src/Unit/InstallTasksTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n...                                                                 3 / 3 (100%)\n\nTime: 00:00.027, Memory: 14.00 MB\n\nOK (3 tests, 7 assertions)\n"
           }
         }
       },
@@ -3503,11 +3503,11 @@
         "task_id": "3325551",
         "title": "Add \"Disable image resize\" setting to image fields",
         "passed": false,
-        "quality_summary": "Patch application failed",
+        "quality_summary": "Test Failures",
         "domain_results": {
           "backend": {
             "passed": false,
-            "output": "No output available"
+            "output": "\n--- Output for core/modules/image/tests/src/Functional/Update/ResizePolicySettingUpdateTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nTest file \"core/modules/image/tests/src/Functional/Update/ResizePolicySettingUpdateTest.php\" not found\n\n--- Output for core/modules/file/tests/src/Kernel/Plugin/Validation/Constraint/FileImageDimensionsConstraintValidatorTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n.                                                                   1 / 1 (100%)\n\nTime: 00:00.720, Memory: 10.00 MB\n\nOK (1 test, 24 assertions)\n"
           }
         }
       },
@@ -3519,7 +3519,7 @@
         "domain_results": {
           "backend": {
             "passed": false,
-            "output": "\n--- Output for core/modules/system/tests/src/Functional/Theme/ExperimentalThemeTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\nE                                                                   1 / 1 (100%)\n\nTime: 00:01.204, Memory: 10.00 MB\n\nThere was 1 error:\n\n1) Drupal\\Tests\\system\\Functional\\Theme\\ExperimentalThemeTest::testExperimentalConfirmForm\nDrupal\\Core\\Config\\Schema\\SchemaIncompleteException: Schema errors for system.theme with the following errors: 0 [default] Theme &#039;stark&#039; is not installed.\n\n/var/www/html/web/core/lib/Drupal/Core/Config/Development/ConfigSchemaChecker.php:98\n/var/www/html/vendor/symfony/event-dispatcher/EventDispatcher.php:206\n/var/www/html/vendor/symfony/event-dispatcher/EventDispatcher.php:56\n/var/www/html/web/core/lib/Drupal/Core/Config/Config.php:232\n/var/www/html/web/core/lib/Drupal/Core/Config/ConfigInstaller.php:436\n/var/www/html/web/core/l"
+            "output": "\n--- Output for core/modules/system/tests/src/Functional/Theme/ExperimentalThemeTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\nE                                                                   1 / 1 (100%)\n\nTime: 00:00.924, Memory: 10.00 MB\n\nThere was 1 error:\n\n1) Drupal\\Tests\\system\\Functional\\Theme\\ExperimentalThemeTest::testExperimentalConfirmForm\nDrupal\\Core\\Config\\Schema\\SchemaIncompleteException: Schema errors for system.theme with the following errors: 0 [default] Theme &#039;stark&#039; is not installed.\n\n/var/www/html/web/core/lib/Drupal/Core/Config/Development/ConfigSchemaChecker.php:98\n/var/www/html/vendor/symfony/event-dispatcher/EventDispatcher.php:206\n/var/www/html/vendor/symfony/event-dispatcher/EventDispatcher.php:56\n/var/www/html/web/core/lib/Drupal/Core/Config/Config.php:232\n/var/www/html/web/core/lib/Drupal/Core/Config/ConfigInstaller.php:436\n/var/www/html/web/core/l"
           }
         }
       },
@@ -3531,7 +3531,7 @@
         "domain_results": {
           "backend": {
             "passed": true,
-            "output": "\n--- Output for core/modules/locale/tests/src/Unit/LocaleTranslationTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n.                                                                   1 / 1 (100%)\n\nTime: 00:00.011, Memory: 12.00 MB\n\nOK (1 test, 1 assertion)\n\n--- Output for core/modules/image/tests/src/Unit/ImageStyleTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n...E                                                                4 / 4 (100%)\n\nTime: 00:00.030, Memory: 14.00 MB\n\nThere was 1 error:\n\n1) Drupal\\Tests\\image\\Unit\\ImageStyleTest::testFlush\nArgumentCountError: Too few arguments to function Drupal\\image\\ImageEffectBase::__construct(), 0 passed and exactly 4 expected\n\n/var/www/html/web/core/modules/image/src/ImageEffectBase.php:47\n/var/www/html/web/core/modules/image/tests/src/Unit/Im"
+            "output": "\n--- Output for core/modules/image/tests/src/Unit/ImageStyleTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n....                                                                4 / 4 (100%)\n\nTime: 00:00.034, Memory: 14.00 MB\n\nOK (4 tests, 18 assertions)\n\n--- Output for core/modules/locale/tests/src/Unit/LocaleTranslationTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n.                                                                   1 / 1 (100%)\n\nTime: 00:00.011, Memory: 12.00 MB\n\nOK (1 test, 1 assertion)\n\n--- Output for core/modules/migrate_drupal/tests/src/Unit/source/DrupalSqlBaseTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n........                                                         "
           }
         }
       },
@@ -3543,7 +3543,7 @@
         "domain_results": {
           "backend": {
             "passed": true,
-            "output": "\n--- Output for core/modules/user/tests/src/Kernel/UserEntityTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n...                                                                 3 / 3 (100%)\n\nTime: 00:02.926, Memory: 10.00 MB\n\nOK (3 tests, 28 assertions)\n\n--- Output for core/modules/user/tests/src/Kernel/Migrate/d6/MigrateUserTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n.                                                                   1 / 1 (100%)\n\nTime: 00:14.801, Memory: 12.00 MB\n\nOK (1 test, 108 assertions)\n"
+            "output": "\n--- Output for core/modules/user/tests/src/Kernel/UserEntityTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n...                                                                 3 / 3 (100%)\n\nTime: 00:01.468, Memory: 10.00 MB\n\nOK (3 tests, 28 assertions)\n\n--- Output for core/modules/user/tests/src/Kernel/Migrate/d6/MigrateUserTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n.                                                                   1 / 1 (100%)\n\nTime: 00:03.766, Memory: 12.00 MB\n\nOK (1 test, 108 assertions)\n"
           }
         }
       },
@@ -3567,7 +3567,7 @@
         "domain_results": {
           "backend": {
             "passed": false,
-            "output": "\n--- Output for core/modules/field/tests/src/Kernel/FieldStorageValidationTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\nE                                                                   1 / 1 (100%)\n\nTime: 00:01.528, Memory: 10.00 MB\n\nThere was 1 error:\n\n1) Drupal\\Tests\\field\\Kernel\\FieldStorageValidationTest::testNoEntitiesExistYetWithHigherCardinalityConstraint\nDrupal\\Component\\Plugin\\Exception\\PluginNotFoundException: The \"NoEntitiesExistYetWithHigherCardinality\" plugin does not exist. Valid plugin IDs for Drupal\\Core\\Validation\\ConstraintManager are: Callback, Blank, NotBlank, Email, Choice, File, Image, PositiveOrZero, IdenticalTo, FieldWidgetConstraint, TestValidatedReferenceConstraint, EntityTestEntityLevel, EntityTestDefaultPlugin, EntityTestComposite, EntityTestContainerFactoryPlugin, UserMailUnique, UserCancelMethod, ProtectedUserField, RoleExists, UserName, UserNameUnique, "
+            "output": "\n--- Output for core/modules/field/tests/src/Kernel/Plugin/Validation/Constraint/NoEntitiesExistYetWithHigherCardinalityTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nTest file \"core/modules/field/tests/src/Kernel/Plugin/Validation/Constraint/NoEntitiesExistYetWithHigherCardinalityTest.php\" not found\n\n--- Output for core/modules/field/tests/src/Unit/Plugin/Validation/Constraint/NoEntitiesExistYetWithHigherCardinalityTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nTest file \"core/modules/field/tests/src/Unit/Plugin/Validation/Constraint/NoEntitiesExistYetWithHigherCardinalityTest.php\" not found\n"
           }
         }
       },
@@ -3579,7 +3579,7 @@
         "domain_results": {
           "backend": {
             "passed": false,
-            "output": "\n--- Output for core/modules/views/tests/src/Functional/Update/DropbuttonConfigUpdateTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nTest file \"core/modules/views/tests/src/Functional/Update/DropbuttonConfigUpdateTest.php\" not found\n\n--- Output for core/modules/views/tests/src/Functional/Handler/FieldDropButtonTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\nE                                                                   1 / 1 (100%)\n\nTime: 00:08.731, Memory: 12.00 MB\n\nThere was 1 error:\n\n1) Drupal\\Tests\\views\\Functional\\Handler\\FieldDropButtonTest::testDropbutton\nTest was run in child process and ended unexpectedly\n\nERRORS!\nTests: 1, Assertions: 0, Errors: 1.\n"
+            "output": "\n--- Output for core/modules/views/tests/src/Functional/Update/DropbuttonConfigUpdateTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nTest file \"core/modules/views/tests/src/Functional/Update/DropbuttonConfigUpdateTest.php\" not found\n\n--- Output for core/modules/views/tests/src/Functional/Handler/FieldDropButtonTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\nE                                                                   1 / 1 (100%)\n\nTime: 00:03.212, Memory: 12.00 MB\n\nThere was 1 error:\n\n1) Drupal\\Tests\\views\\Functional\\Handler\\FieldDropButtonTest::testDropbutton\nTest was run in child process and ended unexpectedly\n\nERRORS!\nTests: 1, Assertions: 0, Errors: 1.\n"
           }
         }
       },
@@ -3599,47 +3599,47 @@
         "task_id": "2536594",
         "title": "Add a FilterFormatRepository providing methods to load filter formats",
         "passed": false,
-        "quality_summary": "Patch application failed",
+        "quality_summary": "Test Failures",
         "domain_results": {
           "backend": {
             "passed": false,
-            "output": "No output available"
+            "output": "\n--- Output for core/modules/taxonomy/tests/src/Functional/Views/TaxonomyFieldFilterTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\nD                                                                   1 / 1 (100%)\n\nHTML output was generated.\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_taxonomy_Functional_Views_TaxonomyFieldFilterTest-1-65771942.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_taxonomy_Functional_Views_TaxonomyFieldFilterTest-2-65771942.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_taxonomy_Functional_Views_TaxonomyFieldFilterTest-3-65771942.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_taxonomy_Functional_Views_TaxonomyFieldFilterTest-4-65771942.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_taxonomy_Functional_Views_TaxonomyFieldFilterTest-5-65771942.html\nhttp://localhost/sit"
           }
         }
       },
       {
         "task_id": "3555670",
         "title": "Deprecate user_load_by_mail & user_load_by_name",
-        "passed": false,
-        "quality_summary": "Patch application failed",
+        "passed": true,
+        "quality_summary": "Clean",
         "domain_results": {
           "backend": {
-            "passed": false,
-            "output": "No output available"
+            "passed": true,
+            "output": "\n--- Output for core/modules/user/tests/src/Functional/UserCreateTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n.                                                                   1 / 1 (100%)\n\nHTML output was generated.\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_user_Functional_UserCreateTest-1-70380514.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_user_Functional_UserCreateTest-2-70380514.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_user_Functional_UserCreateTest-3-70380514.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_user_Functional_UserCreateTest-4-70380514.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_user_Functional_UserCreateTest-5-70380514.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_user_Functional_UserCreateTest-6-70380514.html\nhttp://localhost/sites/si"
           }
         }
       },
       {
         "task_id": "3568387",
         "title": "Deprecate text_summary and move to Help Class",
-        "passed": false,
-        "quality_summary": "Patch application failed",
+        "passed": true,
+        "quality_summary": "Clean",
         "domain_results": {
           "backend": {
-            "passed": false,
-            "output": "No output available"
+            "passed": true,
+            "output": "\n--- Output for core/modules/text/tests/src/Kernel/TextSummaryTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n......                                                              6 / 6 (100%)\n\nTime: 00:02.690, Memory: 10.00 MB\n\nOK (6 tests, 134 assertions)\n"
           }
         }
       },
       {
         "task_id": "3569426",
         "title": "Convert expectation-less test mocks to stubs - Package Manager module",
-        "passed": false,
-        "quality_summary": "Patch application failed",
+        "passed": true,
+        "quality_summary": "Clean",
         "domain_results": {
           "backend": {
-            "passed": false,
-            "output": "No output available"
+            "passed": true,
+            "output": "\n--- Output for core/modules/package_manager/tests/src/Unit/PathLocatorTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n.........                                                           9 / 9 (100%)\n\nTime: 00:00.041, Memory: 14.00 MB\n\nOK (9 tests, 17 assertions)\n\n--- Output for core/modules/package_manager/tests/src/Unit/LoggingStagerTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n.                                                                   1 / 1 (100%)\n\nTime: 00:00.013, Memory: 12.00 MB\n\nOK (1 test, 8 assertions)\n\n--- Output for core/modules/package_manager/tests/src/Unit/LoggingCommitterTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n.                                                  "
           }
         }
       },
@@ -3647,47 +3647,47 @@
         "task_id": "3568922",
         "title": "Method discoverResourceUrl does not check response type",
         "passed": false,
-        "quality_summary": "Patch application failed",
+        "quality_summary": "Test Failures",
         "domain_results": {
           "backend": {
             "passed": false,
-            "output": "No output available"
+            "output": "\n--- Output for core/modules/media/tests/src/Unit/UrlResolverTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nTest file \"core/modules/media/tests/src/Unit/UrlResolverTest.php\" not found\n"
           }
         }
       },
       {
         "task_id": "3469843",
         "title": "Fix getExpectedUnauthorizedEntityAccessCacheability PHPStan-0 issues",
-        "passed": false,
-        "quality_summary": "Patch application failed",
+        "passed": true,
+        "quality_summary": "Clean",
         "domain_results": {
           "backend": {
-            "passed": false,
-            "output": "No output available"
+            "passed": true,
+            "output": "\n--- Output for core/modules/rest ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n................SS.S.SS.S.SS.S......SSS.SSS.SSS.SSS.SSS.SSS....  63 / 165 ( 38%)\n.......................SSSSSS..........S....................... 126 / 165 ( 76%)\n.......................................                         165 / 165 (100%)\n\nHTML output was generated.\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_rest_Functional_EntityResource_ModeratedNode_ModeratedNodeJsonAnonTest-1-23776382.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_rest_Functional_EntityResource_ModeratedNode_ModeratedNodeJsonAnonTest-2-23776382.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_rest_Functional_EntityResource_ModeratedNode_ModeratedNodeJsonAnonTest-3-23776382.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_rest_Functional_EntityResource_ModeratedNode_Mod"
           }
         }
       },
       {
         "task_id": "3568124",
         "title": "Deprecate remaining functions in media.module",
-        "passed": false,
-        "quality_summary": "Patch application failed",
+        "passed": true,
+        "quality_summary": "Clean",
         "domain_results": {
           "backend": {
-            "passed": false,
-            "output": "No output available"
+            "passed": true,
+            "output": ""
           }
         }
       },
       {
         "task_id": "3567544",
         "title": "Alias lookup by path is not case sensitive but AliasPrefixList and AliasRepository::preloadPathAlias's return value is leading to inconsistencies",
-        "passed": false,
-        "quality_summary": "Patch application failed",
+        "passed": true,
+        "quality_summary": "Clean",
         "domain_results": {
           "backend": {
-            "passed": false,
-            "output": "No output available"
+            "passed": true,
+            "output": "\n--- Output for core/modules/path_alias/tests/src/Kernel/AliasTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n......                                                              6 / 6 (100%)\n\nTime: 00:02.382, Memory: 10.00 MB\n\nOK (6 tests, 83 assertions)\n"
           }
         }
       },
@@ -3695,23 +3695,23 @@
         "task_id": "3565886",
         "title": "Navigation module throws an error on missing URL",
         "passed": false,
-        "quality_summary": "Patch application failed",
+        "quality_summary": "Test Failures",
         "domain_results": {
           "backend": {
             "passed": false,
-            "output": "No output available"
+            "output": "\n--- Output for core/modules/navigation/tests/src/Kernel/NavigationEntityRouteHelperTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nTest file \"core/modules/navigation/tests/src/Kernel/NavigationEntityRouteHelperTest.php\" not found\n"
           }
         }
       },
       {
         "task_id": "3567137",
         "title": "Add test coverage for duplicate node titles on content_moderation latest version page",
-        "passed": false,
-        "quality_summary": "Patch application failed",
+        "passed": true,
+        "quality_summary": "Clean",
         "domain_results": {
           "backend": {
-            "passed": false,
-            "output": "No output available"
+            "passed": true,
+            "output": "\n--- Output for core/modules/content_moderation/tests/src/Functional/ModerationStateNodeTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n.F..                                                                4 / 4 (100%)\n\nHTML output was generated.\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_content_moderation_Functional_ModerationStateNodeTest-1-67903059.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_content_moderation_Functional_ModerationStateNodeTest-2-67903059.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_content_moderation_Functional_ModerationStateNodeTest-3-67903059.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_content_moderation_Functional_ModerationStateNodeTest-4-67903059.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_content_moderation_Functional_ModerationStateNodeTest-5-67903059.h"
           }
         }
       },
@@ -3719,11 +3719,11 @@
         "task_id": "3566424",
         "title": "Deprecate Views::pluginManager() and Views::handlerManager() and replace with service locator",
         "passed": false,
-        "quality_summary": "Patch application failed",
+        "quality_summary": "Test Failures",
         "domain_results": {
           "backend": {
             "passed": false,
-            "output": "No output available"
+            "output": "\n--- Output for core/modules/views_ui/tests/src/Functional/DisplayTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\nDDDDDDDDDD                                                        10 / 10 (100%)\n\nHTML output was generated.\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_views_ui_Functional_DisplayTest-1-27918537.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_views_ui_Functional_DisplayTest-2-27918537.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_views_ui_Functional_DisplayTest-3-27918537.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_views_ui_Functional_DisplayTest-4-27918537.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_views_ui_Functional_DisplayTest-5-27918537.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_views_ui_Functional_DisplayTest-6-27918537.html\nhttp://localhost/s"
           }
         }
       },
@@ -3731,23 +3731,23 @@
         "task_id": "2655794",
         "title": "Remove redundant WAI-ARIA role attributes from <main>, <nav>, <aside>, <header>, and <footer> elements",
         "passed": false,
-        "quality_summary": "Patch application failed",
+        "quality_summary": "Test Failures",
         "domain_results": {
           "backend": {
             "passed": false,
-            "output": "No output available"
+            "output": "\n--- Output for core/modules/block/tests/src/Functional/BlockTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n....F.........                                                    14 / 14 (100%)\n\nHTML output was generated.\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockTest-1-54942897.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockTest-2-54942897.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockTest-3-54942897.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockTest-4-54942897.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockTest-5-54942897.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockTest-6-54942897.html\nhttp://localhost/sites/simpletest/browser_output/Drup"
           }
         }
       },
       {
         "task_id": "3453210",
         "title": "getCreatedTime returns string instead of integer",
-        "passed": false,
-        "quality_summary": "Patch application failed",
+        "passed": true,
+        "quality_summary": "Clean",
         "domain_results": {
           "backend": {
-            "passed": false,
-            "output": "No output available"
+            "passed": true,
+            "output": "\n--- Output for core/modules/node/tests/src/Kernel/Migrate/d6/MigrateNodeRevisionTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n.                                                                   1 / 1 (100%)\n\nTime: 00:12.762, Memory: 10.00 MB\n\nOK (1 test, 109 assertions)\n\n--- Output for core/modules/user/tests/src/Kernel/Migrate/d7/MigrateUserTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n.                                                                   1 / 1 (100%)\n\nTime: 00:12.598, Memory: 10.00 MB\n\nOK (1 test, 187 assertions)\n\n--- Output for core/modules/node/tests/src/Kernel/Migrate/d6/MigrateNodeTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n.                                         "
           }
         }
       },
@@ -3779,7 +3779,7 @@
         "task_id": "3472008",
         "title": "Avoid JSON:API schema validation by default when assert is enabled",
         "passed": false,
-        "quality_summary": "('Connection broken: IncompleteRead(4626 bytes read, 463 more expected)', IncompleteRead(4626 bytes read, 463 more expected))",
+        "quality_summary": "Patch application failed",
         "domain_results": {
           "backend": {
             "passed": false,
@@ -3791,11 +3791,11 @@
         "task_id": "3554447",
         "title": "Use #attributes instead of #item_attributes",
         "passed": false,
-        "quality_summary": "HTTPSConnectionPool(host='generativelanguage.googleapis.com', port=443): Read timed out. (read timeout=900)",
+        "quality_summary": "Test Failures",
         "domain_results": {
           "backend": {
             "passed": false,
-            "output": "No output available"
+            "output": "\n--- Output for core/modules/responsive_image/tests/src/Functional/ResponsiveImageFieldDisplayTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\nFF.....F                                                            8 / 8 (100%)\n\nHTML output was generated.\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_responsive_image_Functional_ResponsiveImageFieldDisplayTest-1-15795702.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_responsive_image_Functional_ResponsiveImageFieldDisplayTest-2-15795702.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_responsive_image_Functional_ResponsiveImageFieldDisplayTest-3-15795702.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_responsive_image_Functional_ResponsiveImageFieldDisplayTest-4-15795702.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_responsive_image_Functional_Responsi"
           }
         }
       },
@@ -3803,11 +3803,11 @@
         "task_id": "1522154",
         "title": "Saving non-default revisions shouldn't trigger a search reindex",
         "passed": false,
-        "quality_summary": "Patch application failed",
+        "quality_summary": "Test Failures",
         "domain_results": {
           "backend": {
             "passed": false,
-            "output": "No output available"
+            "output": "\n--- Output for core/modules/node/tests/src/Kernel/NodeSearchTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nTest file \"core/modules/node/tests/src/Kernel/NodeSearchTest.php\" not found\n"
           }
         }
       },
@@ -3850,12 +3850,12 @@
       {
         "task_id": "syn_c5dc7fac",
         "title": "Implement time-based garbage collection for asset aggregates",
-        "passed": false,
-        "quality_summary": "Patch application failed",
+        "passed": true,
+        "quality_summary": "Clean",
         "domain_results": {
           "backend": {
-            "passed": false,
-            "output": "No output available"
+            "passed": true,
+            "output": "\n--- Output for core/tests/Drupal/KernelTests/Core/Asset/AssetDumperGcTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\nDD                                                                  2 / 2 (100%)\n\nTime: 00:00.769, Memory: 10.00 MB\n\n2 tests triggered 1 deprecation:\n\n1) /var/www/html/web/core/tests/Drupal/KernelTests/KernelTestBase.php:237\nKernel test classes must specify the #[RunTestsInSeparateProcesses] attribute, not doing so is deprecated in drupal:11.3.0 and will throw an exception in drupal:12.0.0. See https://www.drupal.org/node/3548485\n\nTriggered by:\n\n* Drupal\\KernelTests\\Core\\Asset\\AssetDumperGcTest::testDeleteAllWithThreshold\n  /var/www/html/web/core/tests/Drupal/KernelTests/Core/Asset/AssetDumperGcTest.php:43\n\n* Drupal\\KernelTests\\Core\\Asset\\AssetDumperGcTest::testDeleteAllWithZeroThreshold\n  /var/www/html/web/core/tests/Drupal/KernelTests/Core/Asset/AssetDumperGcTest.php:69\n"
           }
         }
       },
