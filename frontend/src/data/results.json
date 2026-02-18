@@ -1,5 +1,567 @@
 [
   {
+    "model_name": "stepfun/step-3.5-flash:free",
+    "total_tasks": 46,
+    "total_samples": 460,
+    "total_correct": 49,
+    "pass_at_1": 0.10652173913043475,
+    "pass_at_5": 0.27605244996549344,
+    "tasks": [
+      {
+        "task_id": "2381293",
+        "title": "Actions reordering on views bulk forms",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3505370",
+        "title": "Remove 'filter tips' page and deprecate the long format API",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3114887",
+        "title": "Error responses are stored when using the Download migration process",
+        "passed": true,
+        "quality_summary": "Clean",
+        "domain_results": {
+          "backend": {
+            "passed": true,
+            "output": "\n--- Output for core/modules/migrate/tests/src/Functional/process/DownloadFunctionalTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\nE                                                                   1 / 1 (100%)\n\nHTML output was generated.\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_migrate_Functional_process_DownloadFunctionalTest-1-18552254.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_migrate_Functional_process_DownloadFunctionalTest-2-18552254.html\n\n\nTime: 00:03.059, Memory: 10.00 MB\n\nThere was 1 error:\n\n1) Drupal\\Tests\\migrate\\Functional\\process\\DownloadFunctionalTest::testExceptionThrow\nError: Call to undefined method Drupal\\Core\\File\\FileSystem::exists()\n\n/var/www/html/web/core/modules/migrate/tests/src/Functional/process/DownloadFunctionalTest.php:80\n\nERRORS!\nTests: 1, Assertions: 4, Errors: 1.\n"
+          }
+        }
+      },
+      {
+        "task_id": "2486267",
+        "title": "Attributes of a block content are applied to block itself",
+        "passed": true,
+        "quality_summary": "Clean",
+        "domain_results": {
+          "backend": {
+            "passed": true,
+            "output": "\n--- Output for core/modules/block/tests/src/Functional/BlockHtmlTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\nF                                                                   1 / 1 (100%)\n\nHTML output was generated.\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockHtmlTest-1-79572130.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockHtmlTest-2-79572130.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockHtmlTest-3-79572130.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockHtmlTest-4-79572130.html\n\n\nTime: 00:02.962, Memory: 10.00 MB\n\nThere was 1 failure:\n\n1) Drupal\\Tests\\block\\Functional\\BlockHtmlTest::testHtml\nBehat\\Mink\\Exception\\ElementNotFoundException: Element matching xpath \"//div[@id=\"block-test-html-block\" and @data-custom-attri"
+          }
+        }
+      },
+      {
+        "task_id": "3057267",
+        "title": "Stop automatically logging out users during maintenance mode",
+        "passed": false,
+        "quality_summary": "Test Failures",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "\n--- Output for core/modules/jsonapi/tests/src/Functional/JsonApiFunctionalTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\nF.....                                                              6 / 6 (100%)\n\nHTML output was generated.\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_jsonapi_Functional_JsonApiFunctionalTest-1-92150469.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_jsonapi_Functional_JsonApiFunctionalTest-2-92150469.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_jsonapi_Functional_JsonApiFunctionalTest-3-92150469.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_jsonapi_Functional_JsonApiFunctionalTest-4-92150469.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_jsonapi_Functional_JsonApiFunctionalTest-5-92150469.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_jsonapi_Func"
+          }
+        }
+      },
+      {
+        "task_id": "3560357",
+        "title": "Taxonomy term ID from URL ViewsArgumentDefault plugin does not apply node cache tags when \"Load filter from node page\" is selected",
+        "passed": false,
+        "quality_summary": "Test Failures",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "\n--- Output for core/modules/taxonomy/tests/src/Kernel/Views/TaxonomyDefaultArgumentTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\nEEE                                                                 3 / 3 (100%)\n\nTime: 00:08.879, Memory: 12.00 MB\n\nThere were 3 errors:\n\n1) Drupal\\Tests\\taxonomy\\Kernel\\Views\\TaxonomyDefaultArgumentTest::testNodePath\nError: Call to undefined method Drupal\\views\\ViewExecutable::addCacheableDependency()\n\n/var/www/html/web/core/modules/taxonomy/src/Plugin/views/argument_default/Tid.php:176\n/var/www/html/web/core/modules/views/src/Plugin/views/argument/ArgumentPluginBase.php:895\n/var/www/html/web/core/modules/views/src/ViewExecutable.php:1150\n/var/www/html/web/core/modules/views/src/ViewExecutable.php:1328\n/var/www/html/web/core/modules/views/src/ViewExecutable.php:1452\n/var/www/html/web/core/modules/taxonomy/tests/src/Kernel/Views/TaxonomyDefaultArgumentTest.p"
+          }
+        }
+      },
+      {
+        "task_id": "3544395",
+        "title": "Current user missing from language negotiator outside of request context",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3561564",
+        "title": "Support the same block being used for page title & main content",
+        "passed": true,
+        "quality_summary": "Clean",
+        "domain_results": {
+          "backend": {
+            "passed": true,
+            "output": "\n--- Output for core/modules/block/tests/src/Functional/BlockTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n..............                                                    14 / 14 (100%)\n\nHTML output was generated.\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockTest-1-98547868.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockTest-2-98547868.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockTest-3-98547868.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockTest-4-98547868.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockTest-5-98547868.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockTest-6-98547868.html\nhttp://localhost/sites/simpletest/browser_output/Drup"
+          }
+        }
+      },
+      {
+        "task_id": "2229617",
+        "title": "Change form element access bypass default to FALSE on programmatic submissions.",
+        "passed": true,
+        "quality_summary": "Clean",
+        "domain_results": {
+          "backend": {
+            "passed": true,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3478097",
+        "title": "MySQL no longer recommended and remove Percona",
+        "passed": true,
+        "quality_summary": "Clean",
+        "domain_results": {
+          "backend": {
+            "passed": true,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3325551",
+        "title": "Add \"Disable image resize\" setting to image fields",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3441503",
+        "title": "Add validation constraints to system.theme",
+        "passed": false,
+        "quality_summary": "Test Failures",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "\n--- Output for core/modules/system/tests/src/Functional/Update/ThemeAdminUpdateTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nTest file \"core/modules/system/tests/src/Functional/Update/ThemeAdminUpdateTest.php\" not found\n\n--- Output for core/modules/system/tests/src/Functional/Theme/ExperimentalThemeTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\nE                                                                   1 / 1 (100%)\n\nTime: 00:00.811, Memory: 10.00 MB\n\nThere was 1 error:\n\n1) Drupal\\Tests\\system\\Functional\\Theme\\ExperimentalThemeTest::testExperimentalConfirmForm\nDrupal\\Core\\Config\\Schema\\SchemaIncompleteException: Schema errors for system.theme with the following errors: 0 [default] Theme &#039;stark&#039; is not installed.\n\n/var/www/html/web/core/lib/Drupal/Core/Config/Development/ConfigSchemaChecker.php:98\n/var/www/html/vendor/symfony/event-dispatcher/Eve"
+          }
+        }
+      },
+      {
+        "task_id": "3558167",
+        "title": "Fix \"expects FooInterface, MockObject given\" phpstan errors",
+        "passed": true,
+        "quality_summary": "Clean",
+        "domain_results": {
+          "backend": {
+            "passed": true,
+            "output": "\n--- Output for core/modules/image/tests/src/Unit/ImageStyleTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n....                                                                4 / 4 (100%)\n\nTime: 00:00.027, Memory: 14.00 MB\n\nOK (4 tests, 18 assertions)\n\n--- Output for core/modules/migrate_drupal/tests/src/Unit/source/DrupalSqlBaseTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n........                                                            8 / 8 (100%)\n\nTime: 00:00.032, Memory: 14.00 MB\n\nOK (8 tests, 17 assertions)\n\n--- Output for core/modules/locale/tests/src/Unit/LocaleTranslationTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n.                                                             "
+          }
+        }
+      },
+      {
+        "task_id": "2954725",
+        "title": "AccountInterface::getLastAccessedTime() implementors return incorrect data type",
+        "passed": true,
+        "quality_summary": "Clean",
+        "domain_results": {
+          "backend": {
+            "passed": true,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3552759",
+        "title": "Fix more incorrect phpdoc type hints (part 1)",
+        "passed": true,
+        "quality_summary": "Clean",
+        "domain_results": {
+          "backend": {
+            "passed": true,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3513035",
+        "title": "New NoEntitiesExistYetWithHigherCardinality constraint",
+        "passed": false,
+        "quality_summary": "Test Failures",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "\n--- Output for core/modules/field/tests/src/Kernel/Plugin/Validation/Constraint/NoEntitiesExistYetWithHigherCardinalityTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nTest file \"core/modules/field/tests/src/Kernel/Plugin/Validation/Constraint/NoEntitiesExistYetWithHigherCardinalityTest.php\" not found\n\n--- Output for core/modules/field/tests/src/Unit/Plugin/Validation/Constraint/NoEntitiesExistYetWithHigherCardinalityTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nTest file \"core/modules/field/tests/src/Unit/Plugin/Validation/Constraint/NoEntitiesExistYetWithHigherCardinalityTest.php\" not found\n"
+          }
+        }
+      },
+      {
+        "task_id": "3538681",
+        "title": "Add support for selecting the dropbutton_type with the Views dropbutton field",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3569778",
+        "title": "Fix link in \\Drupal\\Tests\\package_manager\\Kernel\\TestSandboxManager::__sleep doc",
+        "passed": false,
+        "quality_summary": "Test Failures",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "\n--- Output for core/modules/package_manager ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\nEEEE...FFFFFFEFFFFFF.......................FFFFFFFFFFEFFFFEEEEE  63 / 497 ( 12%)\nEEEEEEEFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFF.FF.FF..FFFFFFFF..EFFFF 126 / 497 ( 25%)\nFFFFFFFFFFFFFFFFFEEEEEEEEEEEEFFFFFFFF......FFFFFFF.EEEEE..FFFFF 189 / 497 ( 38%)\nFEEFFFFFFFFFFFEEEEEEFFFFFFFEEEEEEEEEEEEFSFEFFFFFFFEFFFFFFFFF... 252 / 497 ( 50%)\n..................FFEE.EEEEEEEEEEFFFEFFEEE.FFFFEEEEEEEEEEEEEEEF 315 / 497 ( 63%)\nFF.EFFFFFFFEEEEEEEEEEEEEEFFFFFFFFFFFFFFFFEFFS.FFFFFFFFFFFFFFFFF 378 / 497 ( 76%)\nFF............................................................. 441 / 497 ( 88%)\n........................................................        497 / 497 (100%)\n\nHTML output was generated.\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_package_manager_Functional_ComposerRequirementTest-1-23696808.html\nhttp://local"
+          }
+        }
+      },
+      {
+        "task_id": "2536594",
+        "title": "Add a FilterFormatRepository providing methods to load filter formats",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3555670",
+        "title": "Deprecate user_load_by_mail & user_load_by_name",
+        "passed": true,
+        "quality_summary": "Clean",
+        "domain_results": {
+          "backend": {
+            "passed": true,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3568387",
+        "title": "Deprecate text_summary and move to Help Class",
+        "passed": true,
+        "quality_summary": "Clean",
+        "domain_results": {
+          "backend": {
+            "passed": true,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3569426",
+        "title": "Convert expectation-less test mocks to stubs - Package Manager module",
+        "passed": true,
+        "quality_summary": "Clean",
+        "domain_results": {
+          "backend": {
+            "passed": true,
+            "output": "\n--- Output for core/modules/package_manager/tests/src/Unit/LoggingStagerTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n.                                                                   1 / 1 (100%)\n\nTime: 00:00.010, Memory: 12.00 MB\n\nOK (1 test, 8 assertions)\n\n--- Output for core/modules/package_manager/tests/src/Unit/EventWithPackageListTraitTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n..                                                                  2 / 2 (100%)\n\nTime: 00:00.007, Memory: 12.00 MB\n\nOK (2 tests, 8 assertions)\n\n--- Output for core/modules/package_manager/tests/src/Unit/SandboxDirectoryValidatorTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n..........                   "
+          }
+        }
+      },
+      {
+        "task_id": "3568922",
+        "title": "Method discoverResourceUrl does not check response type",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3469843",
+        "title": "Fix getExpectedUnauthorizedEntityAccessCacheability PHPStan-0 issues",
+        "passed": true,
+        "quality_summary": "Clean",
+        "domain_results": {
+          "backend": {
+            "passed": true,
+            "output": "\n--- Output for core/modules/rest ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n................SS.S.SS.S.SS.S......SSS.SSS.SSS.SSS.SSS.SSS....  63 / 165 ( 38%)\n.......................SSSSSS..........S....................... 126 / 165 ( 76%)\n.......................................                         165 / 165 (100%)\n\nHTML output was generated.\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_rest_Functional_EntityResource_ModeratedNode_ModeratedNodeJsonAnonTest-1-33597092.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_rest_Functional_EntityResource_ModeratedNode_ModeratedNodeJsonAnonTest-2-33597092.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_rest_Functional_EntityResource_ModeratedNode_ModeratedNodeJsonAnonTest-3-33597092.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_rest_Functional_EntityResource_ModeratedNode_Mod"
+          }
+        }
+      },
+      {
+        "task_id": "3568124",
+        "title": "Deprecate remaining functions in media.module",
+        "passed": true,
+        "quality_summary": "Clean",
+        "domain_results": {
+          "backend": {
+            "passed": true,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3567544",
+        "title": "Alias lookup by path is not case sensitive but AliasPrefixList and AliasRepository::preloadPathAlias's return value is leading to inconsistencies",
+        "passed": true,
+        "quality_summary": "Clean",
+        "domain_results": {
+          "backend": {
+            "passed": true,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3565886",
+        "title": "Navigation module throws an error on missing URL",
+        "passed": false,
+        "quality_summary": "OpenRouter Error 405: {\"error\":{\"message\":\"Provider returned error\",\"code\":405,\"metadata\":{\"raw\":\"<!doctypehtml><html lang=\\\"zh-cn\\\"><meta charset=\\\"utf-8\\\"><meta http-equiv=\\\"X-UA-Compatible\\\"content=\\\"IE=edge,chrome=1\\\"><meta name=\\\"data-spm\\\"content=\\\"a3c0e\\\"><title>405</title><style>a,body,div,h2,html,p{margin:0;padding:0}a{text-decoration:none;color:#3b6ea3}.container{width:1000px;margin:auto;color:#696969}.header{padding:110px 0}.header .message{height:36px;padding-left:120px;background:url(https://errors.aliyun.com/images/TB1TpamHpXXXXaJXXXXeB7nYVXX-104-162.png) no-repeat 0 -128px;line-height:36px}.main{padding:50px 0;background:#f4f5f7}#block_image{position:relative;left:120px}</style><body data-spm=\\\"7663354\\\"><div data-spm=\\\"1998410538\\\"><div class=\\\"header\\\"><div class=\\\"container\\\"><div class=\\\"message\\\"><div id=\\\"block_message\\\"></div><div><span id=\\\"block_url_tips\\\"></span><strong id=\\\"url\\\"></strong></div><div><span id=\\\"block_time_tips\\\"></span><strong id=\\\"time\\\"></strong></div><div><span id=\\\"block_traceid_tips\\\"></span><strong id=\\\"traceid\\\"></strong></div></div></div></div><div class=\\\"main\\\"><div class=\\\"container\\\"><img id=\\\"block_image\\\"></div></div></div><script>function getRenderData(){var e=document.getElementById(\\\"renderData\\\");return JSON.parse(e.innerHTML)}function convertTimestampToString(e){e=parseInt(e,10),e=new Date(e);return e.getFullYear()+\\\"-\\\"+(\\\"0\\\"+(e.getMonth()+1)).slice(-2)+\\\"-\\\"+(\\\"0\\\"+e.getDate()).slice(-2)+\\\" \\\"+(\\\"0\\\"+e.getHours()).slice(-2)+\\\":\\\"+(\\\"0\\\"+e.getMinutes()).slice(-2)+\\\":\\\"+(\\\"0\\\"+e.getSeconds()).slice(-2)}var en_tips={block_message:\\\"Sorry, your request has been blocked as it may cause potential threats to the server's security.\\\",block_url_tips:\\\"Current URL: \\\",block_time_tips:\\\"Request Time: \\\",block_traceid_tips:\\\"Your Request ID is: \\\"},cn_tips={block_message:\\\"\u5f88\u62b1\u6b49\uff0c\u7531\u4e8e\u60a8\u8bbf\u95ee\u7684URL\u6709\u53ef\u80fd\u5bf9\u7f51\u7ad9\u9020\u6210\u5b89\u5168\u5a01\u80c1\uff0c\u60a8\u7684\u8bbf\u95ee\u88ab\u963b\u65ad\u3002\\\",block_url_tips:\\\"\u5f53\u524d\u7f51\u5740: \\\",block_time_tips:\\\"\u8bf7\u6c42\u65f6\u95f4: \\\",block_traceid_tips:\\\"\u60a8\u7684\u8bf7\u6c42ID\u662f: \\\"};window.onload=function(){var t=getRenderData(),n=\\\"cn\\\";try{navigator.language.startsWith(\\\"zh\\\")||(n=\\\"en\\\")}catch(e){t.lang&&(n=t.lang)}if(t){var e,i=cn_tips,r=document.getElementById(\\\"block_image\\\");for(e in\\\"en\\\"===n?(i=en_tips,r.src=\\\"https://g.alicdn.com/sd-base/static/1.0.5/image/405.png\\\",r.id=\\\"en_block\\\"):r.src=\\\"https://errors.aliyun.com/images/TB15QGaHpXXXXXOaXXXXia39XXX-660-117.png\\\",i)document.getElementById(e).innerText=i[e];n=t.traceid,r=n.slice(8,21);document.getElementById(\\\"traceid\\\").innerText=n,document.getElementById(\\\"url\\\").innerText=location.href.split(\\\"?\\\")[0],document.getElementById(\\\"time\\\").innerText=convertTimestampToString(r)}}</script><textarea id=\\\"renderData\\\" style=\\\"display:none...\",\"provider_name\":\"StepFun\",\"is_byok\":false}},\"user_id\":\"user_32H2u2hi1WAu6C9XmBsogejxzIK\"}",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3567137",
+        "title": "Add test coverage for duplicate node titles on content_moderation latest version page",
+        "passed": true,
+        "quality_summary": "Clean",
+        "domain_results": {
+          "backend": {
+            "passed": true,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3566424",
+        "title": "Deprecate Views::pluginManager() and Views::handlerManager() and replace with service locator",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "2655794",
+        "title": "Remove redundant WAI-ARIA role attributes from <main>, <nav>, <aside>, <header>, and <footer> elements",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3453210",
+        "title": "getCreatedTime returns string instead of integer",
+        "passed": true,
+        "quality_summary": "Clean",
+        "domain_results": {
+          "backend": {
+            "passed": true,
+            "output": "\n--- Output for core/modules/node/tests/src/Kernel/Migrate/d7/MigrateNodeTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\nF                                                                   1 / 1 (100%)\n\nTime: 00:15.742, Memory: 10.00 MB\n\nThere was 1 failure:\n\n1) Drupal\\Tests\\node\\Kernel\\Migrate\\d7\\MigrateNodeTest::testNode\nFailed asserting that 1529615802 is identical to '1529615802'.\n\n/var/www/html/web/core/modules/node/tests/src/Kernel/Migrate/d7/MigrateNodeTest.php:283\n\nFAILURES!\nTests: 1, Assertions: 325, Failures: 1.\n\n--- Output for core/modules/user/tests/src/Kernel/Migrate/d7/MigrateUserTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\nF                                                                   1 / 1 (100%)\n\nTime: 00:12.629, Memory: 10.00 MB\n\nThere was 1 failure:\n\n1) Drupal\\Test"
+          }
+        }
+      },
+      {
+        "task_id": "2954834",
+        "title": "Add poster image to HTML5 media videos",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3565218",
+        "title": "[random test failure] ResponsiveImageFieldUiTest::testResponsiveImageFormatterUi()",
+        "passed": false,
+        "quality_summary": "OpenRouter Error 405: {\"error\":{\"message\":\"Provider returned error\",\"code\":405,\"metadata\":{\"raw\":\"<!doctypehtml><html lang=\\\"zh-cn\\\"><meta charset=\\\"utf-8\\\"><meta http-equiv=\\\"X-UA-Compatible\\\"content=\\\"IE=edge,chrome=1\\\"><meta name=\\\"data-spm\\\"content=\\\"a3c0e\\\"><title>405</title><style>a,body,div,h2,html,p{margin:0;padding:0}a{text-decoration:none;color:#3b6ea3}.container{width:1000px;margin:auto;color:#696969}.header{padding:110px 0}.header .message{height:36px;padding-left:120px;background:url(https://errors.aliyun.com/images/TB1TpamHpXXXXaJXXXXeB7nYVXX-104-162.png) no-repeat 0 -128px;line-height:36px}.main{padding:50px 0;background:#f4f5f7}#block_image{position:relative;left:120px}</style><body data-spm=\\\"7663354\\\"><div data-spm=\\\"1998410538\\\"><div class=\\\"header\\\"><div class=\\\"container\\\"><div class=\\\"message\\\"><div id=\\\"block_message\\\"></div><div><span id=\\\"block_url_tips\\\"></span><strong id=\\\"url\\\"></strong></div><div><span id=\\\"block_time_tips\\\"></span><strong id=\\\"time\\\"></strong></div><div><span id=\\\"block_traceid_tips\\\"></span><strong id=\\\"traceid\\\"></strong></div></div></div></div><div class=\\\"main\\\"><div class=\\\"container\\\"><img id=\\\"block_image\\\"></div></div></div><script>function getRenderData(){var e=document.getElementById(\\\"renderData\\\");return JSON.parse(e.innerHTML)}function convertTimestampToString(e){e=parseInt(e,10),e=new Date(e);return e.getFullYear()+\\\"-\\\"+(\\\"0\\\"+(e.getMonth()+1)).slice(-2)+\\\"-\\\"+(\\\"0\\\"+e.getDate()).slice(-2)+\\\" \\\"+(\\\"0\\\"+e.getHours()).slice(-2)+\\\":\\\"+(\\\"0\\\"+e.getMinutes()).slice(-2)+\\\":\\\"+(\\\"0\\\"+e.getSeconds()).slice(-2)}var en_tips={block_message:\\\"Sorry, your request has been blocked as it may cause potential threats to the server's security.\\\",block_url_tips:\\\"Current URL: \\\",block_time_tips:\\\"Request Time: \\\",block_traceid_tips:\\\"Your Request ID is: \\\"},cn_tips={block_message:\\\"\u5f88\u62b1\u6b49\uff0c\u7531\u4e8e\u60a8\u8bbf\u95ee\u7684URL\u6709\u53ef\u80fd\u5bf9\u7f51\u7ad9\u9020\u6210\u5b89\u5168\u5a01\u80c1\uff0c\u60a8\u7684\u8bbf\u95ee\u88ab\u963b\u65ad\u3002\\\",block_url_tips:\\\"\u5f53\u524d\u7f51\u5740: \\\",block_time_tips:\\\"\u8bf7\u6c42\u65f6\u95f4: \\\",block_traceid_tips:\\\"\u60a8\u7684\u8bf7\u6c42ID\u662f: \\\"};window.onload=function(){var t=getRenderData(),n=\\\"cn\\\";try{navigator.language.startsWith(\\\"zh\\\")||(n=\\\"en\\\")}catch(e){t.lang&&(n=t.lang)}if(t){var e,i=cn_tips,r=document.getElementById(\\\"block_image\\\");for(e in\\\"en\\\"===n?(i=en_tips,r.src=\\\"https://g.alicdn.com/sd-base/static/1.0.5/image/405.png\\\",r.id=\\\"en_block\\\"):r.src=\\\"https://errors.aliyun.com/images/TB15QGaHpXXXXXOaXXXXia39XXX-660-117.png\\\",i)document.getElementById(e).innerText=i[e];n=t.traceid,r=n.slice(8,21);document.getElementById(\\\"traceid\\\").innerText=n,document.getElementById(\\\"url\\\").innerText=location.href.split(\\\"?\\\")[0],document.getElementById(\\\"time\\\").innerText=convertTimestampToString(r)}}</script><textarea id=\\\"renderData\\\" style=\\\"display:none...\",\"provider_name\":\"StepFun\",\"is_byok\":false}},\"user_id\":\"user_32H2u2hi1WAu6C9XmBsogejxzIK\"}",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3472008",
+        "title": "Avoid JSON:API schema validation by default when assert is enabled",
+        "passed": true,
+        "quality_summary": "Clean",
+        "domain_results": {
+          "backend": {
+            "passed": true,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "3554447",
+        "title": "Use #attributes instead of #item_attributes",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "1522154",
+        "title": "Saving non-default revisions shouldn't trigger a search reindex",
+        "passed": false,
+        "quality_summary": "Test Failures",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "\n--- Output for core/modules/node/tests/src/Kernel/NodeSearchTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nTest file \"core/modules/node/tests/src/Kernel/NodeSearchTest.php\" not found\n"
+          }
+        }
+      },
+      {
+        "task_id": "3505182",
+        "title": "An entity without a label causes an uncaught exception for the navigation:title component",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "syn_48456852",
+        "title": "Refactor NewsCardBlock to use ContextualLinksSerializer for SDC contextual links",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "syn_ab05d34e",
+        "title": "Implement static menu link overrides in a Drupal Recipe",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "syn_c5dc7fac",
+        "title": "Implement time-based garbage collection for asset aggregates",
+        "passed": false,
+        "quality_summary": "OpenRouter Error 405: {\"error\":{\"message\":\"Provider returned error\",\"code\":405,\"metadata\":{\"raw\":\"<!doctypehtml><html lang=\\\"zh-cn\\\"><meta charset=\\\"utf-8\\\"><meta http-equiv=\\\"X-UA-Compatible\\\"content=\\\"IE=edge,chrome=1\\\"><meta name=\\\"data-spm\\\"content=\\\"a3c0e\\\"><title>405</title><style>a,body,div,h2,html,p{margin:0;padding:0}a{text-decoration:none;color:#3b6ea3}.container{width:1000px;margin:auto;color:#696969}.header{padding:110px 0}.header .message{height:36px;padding-left:120px;background:url(https://errors.aliyun.com/images/TB1TpamHpXXXXaJXXXXeB7nYVXX-104-162.png) no-repeat 0 -128px;line-height:36px}.main{padding:50px 0;background:#f4f5f7}#block_image{position:relative;left:120px}</style><body data-spm=\\\"7663354\\\"><div data-spm=\\\"1998410538\\\"><div class=\\\"header\\\"><div class=\\\"container\\\"><div class=\\\"message\\\"><div id=\\\"block_message\\\"></div><div><span id=\\\"block_url_tips\\\"></span><strong id=\\\"url\\\"></strong></div><div><span id=\\\"block_time_tips\\\"></span><strong id=\\\"time\\\"></strong></div><div><span id=\\\"block_traceid_tips\\\"></span><strong id=\\\"traceid\\\"></strong></div></div></div></div><div class=\\\"main\\\"><div class=\\\"container\\\"><img id=\\\"block_image\\\"></div></div></div><script>function getRenderData(){var e=document.getElementById(\\\"renderData\\\");return JSON.parse(e.innerHTML)}function convertTimestampToString(e){e=parseInt(e,10),e=new Date(e);return e.getFullYear()+\\\"-\\\"+(\\\"0\\\"+(e.getMonth()+1)).slice(-2)+\\\"-\\\"+(\\\"0\\\"+e.getDate()).slice(-2)+\\\" \\\"+(\\\"0\\\"+e.getHours()).slice(-2)+\\\":\\\"+(\\\"0\\\"+e.getMinutes()).slice(-2)+\\\":\\\"+(\\\"0\\\"+e.getSeconds()).slice(-2)}var en_tips={block_message:\\\"Sorry, your request has been blocked as it may cause potential threats to the server's security.\\\",block_url_tips:\\\"Current URL: \\\",block_time_tips:\\\"Request Time: \\\",block_traceid_tips:\\\"Your Request ID is: \\\"},cn_tips={block_message:\\\"\u5f88\u62b1\u6b49\uff0c\u7531\u4e8e\u60a8\u8bbf\u95ee\u7684URL\u6709\u53ef\u80fd\u5bf9\u7f51\u7ad9\u9020\u6210\u5b89\u5168\u5a01\u80c1\uff0c\u60a8\u7684\u8bbf\u95ee\u88ab\u963b\u65ad\u3002\\\",block_url_tips:\\\"\u5f53\u524d\u7f51\u5740: \\\",block_time_tips:\\\"\u8bf7\u6c42\u65f6\u95f4: \\\",block_traceid_tips:\\\"\u60a8\u7684\u8bf7\u6c42ID\u662f: \\\"};window.onload=function(){var t=getRenderData(),n=\\\"cn\\\";try{navigator.language.startsWith(\\\"zh\\\")||(n=\\\"en\\\")}catch(e){t.lang&&(n=t.lang)}if(t){var e,i=cn_tips,r=document.getElementById(\\\"block_image\\\");for(e in\\\"en\\\"===n?(i=en_tips,r.src=\\\"https://g.alicdn.com/sd-base/static/1.0.5/image/405.png\\\",r.id=\\\"en_block\\\"):r.src=\\\"https://errors.aliyun.com/images/TB15QGaHpXXXXXOaXXXXia39XXX-660-117.png\\\",i)document.getElementById(e).innerText=i[e];n=t.traceid,r=n.slice(8,21);document.getElementById(\\\"traceid\\\").innerText=n,document.getElementById(\\\"url\\\").innerText=location.href.split(\\\"?\\\")[0],document.getElementById(\\\"time\\\").innerText=convertTimestampToString(r)}}</script><textarea id=\\\"renderData\\\" style=\\\"display:none...\",\"provider_name\":\"StepFun\",\"is_byok\":false}},\"user_id\":\"user_32H2u2hi1WAu6C9XmBsogejxzIK\"}",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "syn_66837d23",
+        "title": "Fix deprecated #access values in SDC component render arrays",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "syn_905bee07",
+        "title": "Update Product Review Recipe to align with Drupal 11 text field standards",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "syn_da8a24cb",
+        "title": "Refactor Comment anonymous contact settings to use AnonymousContact enum and PHPUnit 10",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "syn_1848a69a",
+        "title": "Modernize Comment Preview Logic and Migration to PHPUnit 10",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "syn_3afdde77",
+        "title": "Migrate deprecated History module permissions to Access Policy API",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "syn_d7552fe8",
+        "title": "Implement getSummary() for custom FieldTypeCategoryInterface implementations",
+        "passed": false,
+        "quality_summary": "Patch application failed",
+        "domain_results": {
+          "backend": {
+            "passed": false,
+            "output": "No output available"
+          }
+        }
+      }
+    ]
+  },
+  {
     "model_name": "granite4:3b",
     "total_tasks": 46,
     "total_samples": 460,
