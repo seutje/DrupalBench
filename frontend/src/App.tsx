@@ -360,7 +360,7 @@ function App() {
                   className="glass-card"
                   onClick={() => openModelDetails(model)}
                 >
-                  <span className="sample-badge">{model.total_samples} samples</span>
+                  <span className="tasks-badge">{model.total_tasks} tasks</span>
                   <h3 className="text-lg md:text-xl font-semibold mb-6 text-white/90 pr-28">
                     {model.model_name}
                   </h3>
@@ -399,8 +399,8 @@ function App() {
                         </svg>
                       </div>
                       <div>
-                        <span className="stat-value">{model.total_tasks}</span>
-                        <span className="stat-label">Tasks</span>
+                        <span className="stat-value">{model.total_samples}</span>
+                        <span className="stat-label">Samples</span>
                       </div>
                     </div>
                     <div className="stat-card">
