@@ -29,6 +29,13 @@ interface ModelResult {
 }
 
 const isSyntheticTaskId = (taskId: string) => taskId.startsWith('syn');
+type SortField = 'pass_at_1' | 'pass_at_5' | 'model_name';
+type SortDirection = 'asc' | 'desc';
+const DEFAULT_SORT_DIRECTIONS: Record<SortField, SortDirection> = {
+  pass_at_1: 'desc',
+  pass_at_5: 'desc',
+  model_name: 'asc',
+};
 
 type HistoryState = {
   page: 'home' | 'about' | 'contact';
@@ -40,6 +47,8 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activePage, setActivePage] = useState<'home' | 'about' | 'contact'>('home');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [sortField, setSortField] = useState<SortField>('pass_at_1');
+  const [sortDirection, setSortDirection] = useState<SortDirection>(DEFAULT_SORT_DIRECTIONS.pass_at_1);
 
   const applyHistoryState = (state?: HistoryState | null) => {
     if (!state || state.page === 'home') {
@@ -92,13 +101,31 @@ function App() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  const filteredResults = useMemo(() => {
+  const filteredAndSortedResults = useMemo(() => {
     if (!searchQuery.trim()) {
-      return results;
+      return [...results].sort((left, right) => compareModels(left, right, sortField, sortDirection));
     }
     const normalizedQuery = normalizeText(searchQuery);
-    return results.filter((model) => fuzzyMatch(normalizeText(model.model_name), normalizedQuery));
-  }, [searchQuery]);
+    return results
+      .filter((model) => fuzzyMatch(normalizeText(model.model_name), normalizedQuery))
+      .sort((left, right) => compareModels(left, right, sortField, sortDirection));
+  }, [searchQuery, sortDirection, sortField]);
+
+  const setSort = (nextField: SortField) => {
+    if (nextField === sortField) {
+      setSortDirection((current) => (current === 'asc' ? 'desc' : 'asc'));
+      return;
+    }
+    setSortField(nextField);
+    setSortDirection(DEFAULT_SORT_DIRECTIONS[nextField]);
+  };
+
+  const getSortLabel = (field: SortField, label: string) => {
+    if (sortField !== field) {
+      return label;
+    }
+    return `${label} ${sortDirection === 'asc' ? '↑' : '↓'}`;
+  };
 
   if (activePage === 'home' && selectedModel) {
     return (
@@ -284,35 +311,50 @@ function App() {
                   Performance of Large Language Models (LLMs) benchmarked on Drupal 11 engineering standards.
                 </p>
               </div>
-              <div className="search-wrapper">
-                <svg className="search-icon" viewBox="0 0 24 24" aria-hidden="true">
-                  <path
-                    d="M11 4a7 7 0 0 1 5.3 11.7l3 3a1 1 0 0 1-1.4 1.4l-3-3A7 7 0 1 1 11 4Zm0 2a5 5 0 1 0 0 10 5 5 0 0 0 0-10Z"
-                    fill="currentColor"
-                  />
-                </svg>
-                <input
-                  type="search"
-                  placeholder="Search models..."
-                  value={searchQuery}
-                  onChange={(event) => setSearchQuery(event.target.value)}
-                  className="search-input"
-                />
-                <button className="filter-button" aria-label="Filter options">
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
+              <div className="results-controls">
+                <div className="search-wrapper">
+                  <svg className="search-icon" viewBox="0 0 24 24" aria-hidden="true">
                     <path
-                      d="M4 6h16M7 12h10M10 18h4"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
+                      d="M11 4a7 7 0 0 1 5.3 11.7l3 3a1 1 0 0 1-1.4 1.4l-3-3A7 7 0 1 1 11 4Zm0 2a5 5 0 1 0 0 10 5 5 0 0 0 0-10Z"
+                      fill="currentColor"
                     />
                   </svg>
-                </button>
+                  <input
+                    type="search"
+                    placeholder="Search models..."
+                    value={searchQuery}
+                    onChange={(event) => setSearchQuery(event.target.value)}
+                    className="search-input"
+                  />
+                </div>
+                <div className="sort-controls" role="group" aria-label="Sort benchmark results">
+                  <button
+                    className={`sort-button ${sortField === 'pass_at_1' ? 'active' : ''}`}
+                    onClick={() => setSort('pass_at_1')}
+                    aria-pressed={sortField === 'pass_at_1'}
+                  >
+                    {getSortLabel('pass_at_1', 'pass@1')}
+                  </button>
+                  <button
+                    className={`sort-button ${sortField === 'pass_at_5' ? 'active' : ''}`}
+                    onClick={() => setSort('pass_at_5')}
+                    aria-pressed={sortField === 'pass_at_5'}
+                  >
+                    {getSortLabel('pass_at_5', 'pass@5')}
+                  </button>
+                  <button
+                    className={`sort-button ${sortField === 'model_name' ? 'active' : ''}`}
+                    onClick={() => setSort('model_name')}
+                    aria-pressed={sortField === 'model_name'}
+                  >
+                    {getSortLabel('model_name', 'A-Z')}
+                  </button>
+                </div>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {filteredResults.map((model: ModelResult) => (
+              {filteredAndSortedResults.map((model: ModelResult) => (
                 <div 
                   key={model.model_name}
                   className="glass-card"
@@ -408,4 +450,23 @@ const fuzzyMatch = (target: string, query: string) => {
     targetIndex += 1;
   }
   return true;
+};
+
+const compareModels = (
+  left: ModelResult,
+  right: ModelResult,
+  field: SortField,
+  direction: SortDirection
+) => {
+  const factor = direction === 'asc' ? 1 : -1;
+  if (field === 'model_name') {
+    return left.model_name.localeCompare(right.model_name, undefined, { sensitivity: 'base' }) * factor;
+  }
+
+  const diff = left[field] - right[field];
+  if (diff !== 0) {
+    return diff * factor;
+  }
+
+  return left.model_name.localeCompare(right.model_name, undefined, { sensitivity: 'base' });
 };

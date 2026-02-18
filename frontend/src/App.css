@@ -134,6 +134,42 @@
   width: 100%;
 }
 
+.results-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 420px;
+}
+
+.sort-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.sort-button {
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.5);
+  color: rgba(226, 232, 240, 0.84);
+  font-size: 0.8rem;
+  line-height: 1;
+  padding: 8px 12px;
+  transition: border 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.sort-button:hover {
+  border-color: rgba(129, 140, 248, 0.6);
+  color: #ffffff;
+}
+
+.sort-button.active {
+  border-color: rgba(129, 140, 248, 0.7);
+  background: rgba(79, 70, 229, 0.35);
+  color: #ffffff;
+}
+
 .search-icon {
   width: 18px;
   height: 18px;
@@ -153,21 +189,14 @@
   color: rgba(148, 163, 184, 0.8);
 }
 
-.filter-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 10px;
-  border: 1px solid rgba(148, 163, 184, 0.3);
-  background: rgba(30, 41, 59, 0.45);
-  color: rgba(226, 232, 240, 0.8);
-}
+@media (min-width: 768px) {
+  .results-controls {
+    align-items: flex-end;
+  }
 
-.filter-button svg {
-  width: 16px;
-  height: 16px;
+  .sort-controls {
+    justify-content: flex-end;
+  }
 }
 
 .glass-card {
