@@ -1127,15 +1127,15 @@
     "model_name": "ministral-3:3b",
     "total_tasks": 46,
     "total_samples": 460,
-    "total_correct": 7,
-    "pass_at_1": 0.015217391304347827,
-    "pass_at_5": 0.04114906832298137,
+    "total_correct": 8,
+    "pass_at_1": 0.017391304347826087,
+    "pass_at_5": 0.06944444444444445,
     "tasks": [
       {
         "task_id": "2381293",
         "title": "Actions reordering on views bulk forms",
         "passed": false,
-        "quality_summary": "Patch application failed",
+        "quality_summary": "HTTPConnectionPool(host='127.0.0.1', port=11434): Read timed out. (read timeout=900)",
         "domain_results": {
           "backend": {
             "passed": false,
@@ -1158,24 +1158,24 @@
       {
         "task_id": "3114887",
         "title": "Error responses are stored when using the Download migration process",
-        "passed": true,
-        "quality_summary": "Clean",
-        "domain_results": {
-          "backend": {
-            "passed": true,
-            "output": "\n--- Output for core/modules/migrate/tests/src/Functional/process/DownloadFunctionalTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\nF                                                                   1 / 1 (100%)\n\nTime: 00:03.354, Memory: 10.00 MB\n\nThere was 1 failure:\n\n1) Drupal\\Tests\\migrate\\Functional\\process\\DownloadFunctionalTest::testExceptionThrow\nFailed asserting that file \"http://localhost/public://first.jpg\" exists.\n\n/var/www/html/web/core/modules/migrate/tests/src/Functional/process/DownloadFunctionalTest.php:65\n\nFAILURES!\nTests: 1, Assertions: 2, Failures: 1.\n"
-          }
-        }
-      },
-      {
-        "task_id": "2486267",
-        "title": "Attributes of a block content are applied to block itself",
         "passed": false,
         "quality_summary": "Patch application failed",
         "domain_results": {
           "backend": {
             "passed": false,
             "output": "No output available"
+          }
+        }
+      },
+      {
+        "task_id": "2486267",
+        "title": "Attributes of a block content are applied to block itself",
+        "passed": true,
+        "quality_summary": "Clean",
+        "domain_results": {
+          "backend": {
+            "passed": true,
+            "output": "\n--- Output for core/modules/block/tests/src/Functional/BlockHtmlTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n.                                                                   1 / 1 (100%)\n\nHTML output was generated.\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockHtmlTest-1-46940803.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockHtmlTest-2-46940803.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockHtmlTest-3-46940803.html\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_block_Functional_BlockHtmlTest-4-46940803.html\n\n\nTime: 00:03.390, Memory: 10.00 MB\n\nOK (1 test, 7 assertions)\n"
           }
         }
       },
@@ -1218,11 +1218,11 @@
       {
         "task_id": "3561564",
         "title": "Support the same block being used for page title & main content",
-        "passed": false,
-        "quality_summary": "Patch application failed",
+        "passed": true,
+        "quality_summary": "Clean",
         "domain_results": {
           "backend": {
-            "passed": false,
+            "passed": true,
             "output": "No output available"
           }
         }
@@ -1278,11 +1278,11 @@
       {
         "task_id": "3558167",
         "title": "Fix \"expects FooInterface, MockObject given\" phpstan errors",
-        "passed": false,
-        "quality_summary": "Patch application failed",
+        "passed": true,
+        "quality_summary": "Clean",
         "domain_results": {
           "backend": {
-            "passed": false,
+            "passed": true,
             "output": "No output available"
           }
         }
@@ -1290,12 +1290,12 @@
       {
         "task_id": "2954725",
         "title": "AccountInterface::getLastAccessedTime() implementors return incorrect data type",
-        "passed": false,
-        "quality_summary": "Patch application failed",
+        "passed": true,
+        "quality_summary": "Clean",
         "domain_results": {
           "backend": {
-            "passed": false,
-            "output": "No output available"
+            "passed": true,
+            "output": "\n--- Output for core/modules/user/tests/src/Kernel/UserEntityTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n...                                                                 3 / 3 (100%)\n\nTime: 00:02.172, Memory: 10.00 MB\n\nOK (3 tests, 28 assertions)\n\n--- Output for core/modules/user/tests/src/Kernel/Migrate/d6/MigrateUserTest.php ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\n.                                                                   1 / 1 (100%)\n\nTime: 00:03.859, Memory: 12.00 MB\n\nOK (1 test, 108 assertions)\n"
           }
         }
       },
@@ -1303,7 +1303,7 @@
         "task_id": "3552759",
         "title": "Fix more incorrect phpdoc type hints (part 1)",
         "passed": false,
-        "quality_summary": "Patch application failed",
+        "quality_summary": "HTTPConnectionPool(host='127.0.0.1', port=11434): Read timed out. (read timeout=900)",
         "domain_results": {
           "backend": {
             "passed": false,
@@ -1327,7 +1327,7 @@
         "task_id": "3538681",
         "title": "Add support for selecting the dropbutton_type with the Views dropbutton field",
         "passed": false,
-        "quality_summary": "Patch application failed",
+        "quality_summary": "HTTPConnectionPool(host='127.0.0.1', port=11434): Read timed out. (read timeout=900)",
         "domain_results": {
           "backend": {
             "passed": false,
@@ -1338,12 +1338,12 @@
       {
         "task_id": "3569778",
         "title": "Fix link in \\Drupal\\Tests\\package_manager\\Kernel\\TestSandboxManager::__sleep doc",
-        "passed": false,
-        "quality_summary": "Patch application failed",
+        "passed": true,
+        "quality_summary": "Clean",
         "domain_results": {
           "backend": {
-            "passed": false,
-            "output": "No output available"
+            "passed": true,
+            "output": "\n--- Output for core/modules/package_manager ---\nPHPUnit 11.5.50 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.30\nConfiguration: /var/www/html/web/core/phpunit.xml\n\nEEEE...FFFFFFEFFFFFF.......................FFFFFFFFFFEFFFFEEEEE  63 / 497 ( 12%)\nEEEEEEEFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFF.FF.FF..FFFFFFFF..EFFFF 126 / 497 ( 25%)\nFFFFFFFFFFFFFFFFFEEEEEEEEEEEEFFFFFFFF......FFFFFFF.EEEEE..FFFFF 189 / 497 ( 38%)\nFEEFFFFFFFFFFFEEEEEEFFFFFFFEEEEEEEEEEEEFSFEFFFFFFFEFFFFFFFFF... 252 / 497 ( 50%)\n..................FFEE.EEEEEEEEEEFFFEFFEEE.FFFFEEEEEEEEEEEEEEEF 315 / 497 ( 63%)\nFF.EFFFFFFFEEEEEEEEEEEEEEFFFFFFFFFFFFFFFFEFFS.FFFFFFFFFFFFFFFFF 378 / 497 ( 76%)\nFF............................................................. 441 / 497 ( 88%)\n........................................................        497 / 497 (100%)\n\nHTML output was generated.\nhttp://localhost/sites/simpletest/browser_output/Drupal_Tests_package_manager_Functional_ComposerRequirementTest-1-89932487.html\nhttp://local"
           }
         }
       },
@@ -1375,7 +1375,7 @@
         "task_id": "3568387",
         "title": "Deprecate text_summary and move to Help Class",
         "passed": false,
-        "quality_summary": "Patch application failed",
+        "quality_summary": "HTTPConnectionPool(host='127.0.0.1', port=11434): Read timed out. (read timeout=900)",
         "domain_results": {
           "backend": {
             "passed": false,
@@ -1411,7 +1411,7 @@
         "task_id": "3469843",
         "title": "Fix getExpectedUnauthorizedEntityAccessCacheability PHPStan-0 issues",
         "passed": false,
-        "quality_summary": "Patch application failed",
+        "quality_summary": "HTTPConnectionPool(host='127.0.0.1', port=11434): Read timed out. (read timeout=900)",
         "domain_results": {
           "backend": {
             "passed": false,
@@ -1518,11 +1518,11 @@
       {
         "task_id": "3565218",
         "title": "[random test failure] ResponsiveImageFieldUiTest::testResponsiveImageFormatterUi()",
-        "passed": true,
-        "quality_summary": "Clean",
+        "passed": false,
+        "quality_summary": "Patch application failed",
         "domain_results": {
           "backend": {
-            "passed": true,
+            "passed": false,
             "output": "No output available"
           }
         }
@@ -1531,7 +1531,7 @@
         "task_id": "3472008",
         "title": "Avoid JSON:API schema validation by default when assert is enabled",
         "passed": false,
-        "quality_summary": "Patch application failed",
+        "quality_summary": "HTTPConnectionPool(host='127.0.0.1', port=11434): Read timed out. (read timeout=900)",
         "domain_results": {
           "backend": {
             "passed": false,
@@ -1627,7 +1627,7 @@
         "task_id": "syn_905bee07",
         "title": "Update Product Review Recipe to align with Drupal 11 text field standards",
         "passed": false,
-        "quality_summary": "Patch application failed",
+        "quality_summary": "HTTPConnectionPool(host='127.0.0.1', port=11434): Read timed out. (read timeout=900)",
         "domain_results": {
           "backend": {
             "passed": false,
@@ -1639,7 +1639,7 @@
         "task_id": "syn_da8a24cb",
         "title": "Refactor Comment anonymous contact settings to use AnonymousContact enum and PHPUnit 10",
         "passed": false,
-        "quality_summary": "Patch application failed",
+        "quality_summary": "HTTPConnectionPool(host='127.0.0.1', port=11434): Read timed out. (read timeout=900)",
         "domain_results": {
           "backend": {
             "passed": false,
@@ -1651,7 +1651,7 @@
         "task_id": "syn_1848a69a",
         "title": "Modernize Comment Preview Logic and Migration to PHPUnit 10",
         "passed": false,
-        "quality_summary": "Patch application failed",
+        "quality_summary": "HTTPConnectionPool(host='127.0.0.1', port=11434): Read timed out. (read timeout=900)",
         "domain_results": {
           "backend": {
             "passed": false,
@@ -1663,7 +1663,7 @@
         "task_id": "syn_3afdde77",
         "title": "Migrate deprecated History module permissions to Access Policy API",
         "passed": false,
-        "quality_summary": "Patch application failed",
+        "quality_summary": "HTTPConnectionPool(host='127.0.0.1', port=11434): Read timed out. (read timeout=900)",
         "domain_results": {
           "backend": {
             "passed": false,
